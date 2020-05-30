@@ -6,9 +6,9 @@ using Playnite.Common.Web;
 using Newtonsoft.Json;
 using Steam.Models;
 using System.Text;
-using OriginLibrary.Models;
 using System.Net.Http;
 using System.Linq;
+using MetadataLocal.OriginLibrary;
 
 namespace MetadataLocal
 {
