@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using PluginCommon;
 using Playnite.Common.Web;
 using Newtonsoft.Json;
-using Steam.Models;
 using System.Text;
 using System.Net.Http;
 using System.Linq;
 using MetadataLocal.OriginLibrary;
+using MetadataLocal.SteamLibrary;
 
 namespace MetadataLocal
 {

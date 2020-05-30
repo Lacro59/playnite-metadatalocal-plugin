@@ -50,11 +50,6 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="SteamLibrary, Version=1.0.0.26790, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Ressources\SteamLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -79,6 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EpicLibrary\WebStoreClient.cs" />
     <Compile Include="EpicLibrary\WebStoreModels.cs" />
+    <Compile Include="SteamLibrary\SteamDateConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -104,7 +100,6 @@
   <ItemGroup>
     <None Include="Ressources\playnite-plugincommon.dll" />
     <None Include="Ressources\Playnite.Common.dll" />
-    <None Include="Ressources\SteamLibrary.dll" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
