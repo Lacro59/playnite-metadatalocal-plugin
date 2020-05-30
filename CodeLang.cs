@@ -122,7 +122,7 @@ namespace MetadataLocal
         {
             if (PlayniteLanguage == "english")
             {
-                PlayniteLanguage = "us";
+                PlayniteLanguage = "en_US";
             }
             return PlayniteLanguage.Substring(0, 2);
         }

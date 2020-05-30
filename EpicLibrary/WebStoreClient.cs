@@ -52,9 +52,9 @@ namespace MetadataLocal
         public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug, string PlayniteLanguage)
         {
             string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
-            if (PlayniteLanguage == "es-ES" || PlayniteLanguage == "zh-Hant")
+            if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
             {
-                EpicLangCountry = PlayniteLanguage;
+                EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);
             }
             var slugUri = productSlug.Split('/').First();
             var productUrl = string.Format(ProductUrlBase, slugUri, EpicLangCountry);

@@ -84,17 +84,8 @@ namespace MetadataLocal
                     break;
             }
 
-
-
-
-
-
-
             return Description;
         }
-
-
-
 
 
         // Override Steam function GetRawStoreAppDetail in WebApiClient on SteamLibrary.
