@@ -45,9 +45,9 @@ namespace MetadataLocal
             return settings;
         }
 
-        public override UserControl GetSettingsView(bool firstRunSettings)
-        {
-            return new MetadataLocalSettingsView();
-        }
+        //public override UserControl GetSettingsView(bool firstRunSettings)
+        //{
+        //    return new MetadataLocalSettingsView();
+        //}
     }
 }
