@@ -9,11 +9,15 @@ using System.Net.Http;
 using System.Linq;
 using MetadataLocal.OriginLibrary;
 using MetadataLocal.SteamLibrary;
+using Playnite.SDK;
+using System.Diagnostics;
 
 namespace MetadataLocal
 {
     public class MetadataLocalProvider : OnDemandMetadataProvider
     {
+        private static readonly ILogger logger = LogManager.GetLogger();
+
         private readonly MetadataRequestOptions options;
         private readonly MetadataLocal plugin;
 
@@ -34,54 +38,64 @@ namespace MetadataLocal
         // Override additional methods based on supported metadata fields.
         public override string GetDescription()
         {
-        // Get Playnite language
-        PlayniteLanguage = Localization.GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
+            // Get Playnite language
+            PlayniteLanguage = Localization.GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
 
             // Get type source, data and description
             string Data;
             string Description = "";
-            string gameId = options.GameData.GameId;
-            switch (options.GameData.Source.Name.ToLower())
+
+            try
             {
-                case "steam":
-                    uint appId = uint.Parse(gameId);
-                    Data = GetSteamData(appId, PlayniteLanguage);
-                    var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
-                    Description = parsedData[appId.ToString()].data.detailed_description;
-                    break;
+                string gameId = options.GameData.GameId;
 
-                case "origin":
-                    Description = GetOriginData(gameId, PlayniteLanguage);
-                    break;
+                switch (options.GameData.Source.Name.ToLower())
+                {
+                    case "steam":
+                        uint appId = uint.Parse(gameId);
+                        Data = GetSteamData(appId, PlayniteLanguage);
+                        var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
+                        Description = parsedData[appId.ToString()].data.detailed_description;
+                        break;
 
-                case "epic":
-                    using (var client = new WebStoreClient())
-                    {
-                        var catalogs = client.QuerySearch(options.GameData.Name).GetAwaiter().GetResult();
-                        if (catalogs.HasItems())
+                    case "origin":
+                        Description = GetOriginData(gameId, PlayniteLanguage);
+                        break;
+
+                    case "epic":
+                        using (var client = new WebStoreClient())
                         {
-                            var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
-                            if (product.pages.HasItems())
+                            var catalogs = client.QuerySearch(options.GameData.Name).GetAwaiter().GetResult();
+                            if (catalogs.HasItems())
                             {
-                                ////devel7
-                                //var page = product.pages[0];
-
-                                //devel8
-                                var page = product.pages.FirstOrDefault(a => a.type == "productHome");
-                                if (page == null)
+                                var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
+                                if (product.pages.HasItems())
                                 {
-                                    page = product.pages[0];
-                                }
+                                    ////devel7
+                                    //var page = product.pages[0];
 
-                                Description = page.data.about.description;
-                                if (!Description.IsNullOrEmpty())
-                                {
-                                    Description = Description.Replace("\n", "\n<br>");
+                                    //devel8
+                                    var page = product.pages.FirstOrDefault(a => a.type == "productHome");
+                                    if (page == null)
+                                    {
+                                        page = product.pages[0];
+                                    }
+
+                                    Description = page.data.about.description;
+                                    if (!Description.IsNullOrEmpty())
+                                    {
+                                        Description = Description.Replace("\n", "\n<br>");
+                                    }
                                 }
                             }
                         }
-                    }
-                    break;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                var LineNumber = new StackTrace(ex, true).GetFrame(0).GetFileLineNumber();
+                logger.Error(ex, $"MetadataLocal [{LineNumber}]");
             }
 
             return Description;
