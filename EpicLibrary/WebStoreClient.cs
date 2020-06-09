@@ -1,4 +1,5 @@
 ﻿using Playnite.Common;
+using PluginCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
