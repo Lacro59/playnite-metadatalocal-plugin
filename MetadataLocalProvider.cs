@@ -95,7 +95,8 @@ namespace MetadataLocal
             catch (Exception ex)
             {
                 var LineNumber = new StackTrace(ex, true).GetFrame(0).GetFileLineNumber();
-                logger.Error(ex, $"MetadataLocal [{LineNumber}]");
+                string FileName = new StackTrace(ex, true).GetFrame(0).GetFileName();
+                logger.Error(ex, $"MetadataLocal [{FileName} {LineNumber}] ");
             }
 
             return Description;
