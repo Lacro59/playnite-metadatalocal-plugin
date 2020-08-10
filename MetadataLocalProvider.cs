@@ -11,6 +11,7 @@ using MetadataLocal.OriginLibrary;
 using MetadataLocal.SteamLibrary;
 using Playnite.SDK;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace MetadataLocal
 {
@@ -71,10 +72,6 @@ namespace MetadataLocal
                                 var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
                                 if (product.pages.HasItems())
                                 {
-                                    ////devel7
-                                    //var page = product.pages[0];
-
-                                    //devel8
                                     var page = product.pages.FirstOrDefault(a => a.type == "productHome");
                                     if (page == null)
                                     {
@@ -85,6 +82,12 @@ namespace MetadataLocal
                                     if (!Description.IsNullOrEmpty())
                                     {
                                         Description = Description.Replace("\n", "\n<br>");
+
+                                        // Markdown image to html image  
+                                        Description = Regex.Replace(
+                                            Description, 
+                                            "!\\[[a-zA-Z0-9- ]*\\]\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)", 
+                                            "<img src=\"$1\" width=\"100%\"/>");
                                     }
                                 }
                             }

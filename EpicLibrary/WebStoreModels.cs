@@ -6,22 +6,6 @@ namespace MetadataLocal
 {
     public class WebStoreModels
     {
-        ////devel7
-        //public class QuerySearch
-        //{
-        //    public class Variables
-        //    {
-        //        public string @namespace = "epic";
-        //        public string locale = CodeLang.GetEpicLang(MetadataLocalProvider.PlayniteLanguage);
-        //        public string country = CodeLang.GetEpicLangCountry(MetadataLocalProvider.PlayniteLanguage).ToUpper();
-        //        public string query;
-        //    }
-        //
-        //    public Variables variables = new Variables();
-        //    public string query = @"query searchQuery($namespace: String!,$locale: String!,$country: String!,$query: String!,$hasCountryFilter: Boolean,$filterCountry: String,$filterAgeGroup: Int){ Catalog {catalogOffers(namespace: $namespace, locale: $locale, params: {  keywords: $query,  country: $country}, countryAgeFilter: {shouldCheck: $hasCountryFilter,filterCountry: $filterCountry,filterAgeGroup: $filterAgeGroup}) { elements { url title id  productSlug categories { path }}}}}";
-        //}
-
-        //devel8
         public class QuerySearch
         {
             public class Variables
@@ -41,16 +25,6 @@ namespace MetadataLocal
 
         public class QuerySearchResponse
         {
-            ////devel7
-            //public class CatalogOfferElemen
-            //{
-            //    public string url;
-            //    public string title;
-            //    public string id;
-            //    public string productSlug;
-            //}
-
-            //devel8
             public class SearchStoreElement
             {
                 public string url;
@@ -59,23 +33,6 @@ namespace MetadataLocal
                 public string productSlug;
             }
 
-            ////devel7
-            //public class Data
-            //{
-            //    public class CatalogItem
-            //    {
-            //        public class CatalogOffer
-            //        {
-            //            public List<CatalogOfferElemen> elements;
-            //        }
-            //
-            //        public CatalogOffer catalogOffers;
-            //    }
-            //
-            //    public CatalogItem Catalog;
-            //}
-
-            //devel8
             public class Data
             {
                 public class CatalogItem
@@ -116,23 +73,6 @@ namespace MetadataLocal
                 public Hero hero;
             }
 
-            ////devel7
-            //public class Page
-            //{
-            //    public string @namespace;
-            //    public string _title;
-            //    public string regionBlock;
-            //    public string productName;
-            //    public string _urlPattern;
-            //    public string _slug;
-            //    public DateTime? _activeDate;
-            //    public DateTime? lastModified;
-            //    public string _locale;
-            //    public string _id;
-            //    public PageData data;
-            //}
-
-            //devel8
             public class Page
             {
                 public string @namespace;

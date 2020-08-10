@@ -26,19 +26,6 @@ namespace MetadataLocal
             httpClient.Dispose();
         }
 
-        ////devel7
-        //public async Task<List<WebStoreModels.QuerySearchResponse.CatalogOfferElemen>> QuerySearch(string searchTerm)
-        //{
-        //    var query = new WebStoreModels.QuerySearch();
-        //    query.variables.query = searchTerm;
-        //    var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-        //    var response = await httpClient.PostAsync(GraphQLEndpoint, content);
-        //    var str = await response.Content.ReadAsStringAsync();
-        //    var data = Serialization.FromJson<WebStoreModels.QuerySearchResponse>(str);
-        //    return data.data.Catalog.catalogOffers.elements;
-        //}
-
-        //devel8
         public async Task<List<WebStoreModels.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
         {
             var query = new WebStoreModels.QuerySearch();
