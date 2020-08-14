@@ -1,13 +1,17 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Plugins;
+using PluginCommon;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace MetadataLocal
 {
     public class MetadataLocal : MetadataPlugin
     {
         private static readonly ILogger logger = LogManager.GetLogger();
+        private static IResourceProvider resources = new ResourceProvider();
 
         private MetadataLocalSettings settings { get; set; }
 
@@ -29,6 +33,21 @@ namespace MetadataLocal
         {
             settings = new MetadataLocalSettings(this);
             PlayniteConfigurationPath = api.Paths.ConfigurationPath;
+
+
+            // Get plugin's location 
+            string pluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // Check version
+            if (settings.EnableCheckVersion)
+            {
+                CheckVersion cv = new CheckVersion();
+
+                if (cv.Check("MetadataLocal", pluginFolder))
+                {
+                    cv.ShowNotification(api, "MetadataLocal - " + resources.GetString("LOCUpdaterWindowTitle"));
+                }
+            }
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
