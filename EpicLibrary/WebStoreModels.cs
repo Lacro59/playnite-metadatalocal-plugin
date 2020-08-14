@@ -8,11 +8,22 @@ namespace MetadataLocal
     {
         public class QuerySearch
         {
+            //public class Variables
+            //{
+            //    public string locale = CodeLang.GetEpicLang(MetadataLocalProvider.PlayniteLanguage);
+            //    public string country = CodeLang.GetEpicLangCountry(MetadataLocalProvider.PlayniteLanguage).ToUpper();
+            //    public string allowCountries = CodeLang.GetEpicLangCountry(MetadataLocalProvider.PlayniteLanguage).ToUpper();
+            //    public string sortBy = "title";
+            //    public string sortDir = "DESC";
+            //    public string category = "games/edition/base|bundles/games|editors";
+            //    public string keywords;
+            //}
+
             public class Variables
             {
-                public string locale = CodeLang.GetEpicLang(MetadataLocalProvider.PlayniteLanguage);
-                public string country = CodeLang.GetEpicLangCountry(MetadataLocalProvider.PlayniteLanguage).ToUpper();
-                public string allowCountries = CodeLang.GetEpicLangCountry(MetadataLocalProvider.PlayniteLanguage).ToUpper();
+                public string locale = "en-US";
+                public string country = "US";
+                public string allowCountries = "US";
                 public string sortBy = "title";
                 public string sortDir = "DESC";
                 public string category = "games/edition/base|bundles/games|editors";
