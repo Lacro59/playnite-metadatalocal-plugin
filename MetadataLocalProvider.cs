@@ -85,8 +85,8 @@ namespace MetadataLocal
 
                                         // Markdown image to html image  
                                         Description = Regex.Replace(
-                                            Description, 
-                                            "!\\[[a-zA-Z0-9- ]*\\]\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)", 
+                                            Description,
+                                            "!\\[[a-zA-Z0-9- ]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)", 
                                             "<img src=\"$1\" width=\"100%\"/>");
                                     }
                                 }
