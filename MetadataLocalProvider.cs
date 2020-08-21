@@ -26,8 +26,27 @@ namespace MetadataLocal
 
         public string PlayniteConfigurationPath { get; set; }
         public static string  PlayniteLanguage { get; set; }
+        
+        private List<MetadataField> availableFields;
+        public override List<MetadataField> AvailableFields
+        {
+            get
+            {
+                if (availableFields == null)
+                {
+                    availableFields = GetAvailableFields();
+                }
+        
+                return availableFields;
+            }
+        }
 
-        public override List<MetadataField> AvailableFields => throw new NotImplementedException();
+        private List<MetadataField> GetAvailableFields()
+        {
+            var fields = new List<MetadataField> { MetadataField.Name };
+            fields.Add(MetadataField.Description);
+            return fields;
+        }
 
         public MetadataLocalProvider(MetadataRequestOptions options, MetadataLocal plugin, string PlayniteConfigurationPath)
         {
@@ -39,70 +58,80 @@ namespace MetadataLocal
         // Override additional methods based on supported metadata fields.
         public override string GetDescription()
         {
-            // Get Playnite language
-            PlayniteLanguage = Localization.GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
-
             // Get type source, data and description
             string Data;
             string Description = "";
 
-            try
+            if (AvailableFields.Contains(MetadataField.Description))
             {
-                string gameId = options.GameData.GameId;
+                // Get Playnite language
+                PlayniteLanguage = Localization.GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
 
-                switch (options.GameData.Source.Name.ToLower())
+                try
                 {
-                    case "steam":
-                        uint appId = uint.Parse(gameId);
-                        Data = GetSteamData(appId, PlayniteLanguage);
-                        var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
-                        Description = parsedData[appId.ToString()].data.detailed_description;
-                        break;
+                    string gameId = options.GameData.GameId;
 
-                    case "origin":
-                        Description = GetOriginData(gameId, PlayniteLanguage);
-                        break;
+                    switch (options.GameData.Source.Name.ToLower())
+                    {
+                        case "steam":
+                            uint appId = uint.Parse(gameId);
+                            Data = GetSteamData(appId, PlayniteLanguage);
+                            var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
+                            Description = parsedData[appId.ToString()].data.detailed_description;
+                            break;
 
-                    case "epic":
-                        using (var client = new WebStoreClient())
-                        {
-                            var catalogs = client.QuerySearch(options.GameData.Name).GetAwaiter().GetResult();
-                            if (catalogs.HasItems())
+                        case "origin":
+                            Description = GetOriginData(gameId, PlayniteLanguage);
+                            break;
+
+                        case "epic":
+                            using (var client = new WebStoreClient())
                             {
-                                var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
-                                if (product.pages.HasItems())
+                                var catalogs = client.QuerySearch(options.GameData.Name).GetAwaiter().GetResult();
+                                if (catalogs.HasItems())
                                 {
-                                    var page = product.pages.FirstOrDefault(a => a.type == "productHome");
-                                    if (page == null)
+                                    var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
+                                    if (product.pages.HasItems())
                                     {
-                                        page = product.pages[0];
-                                    }
+                                        var page = product.pages.FirstOrDefault(a => a.type == "productHome");
+                                        if (page == null)
+                                        {
+                                            page = product.pages[0];
+                                        }
 
-                                    Description = page.data.about.description;
-                                    if (!Description.IsNullOrEmpty())
-                                    {
-                                        Description = Description.Replace("\n", "\n<br>");
+                                        Description = page.data.about.description;
+                                        if (!Description.IsNullOrEmpty())
+                                        {
+                                            Description = Description.Replace("\n", "\n<br>");
 
-                                        // Markdown image to html image  
-                                        Description = Regex.Replace(
-                                            Description,
-                                            "!\\[[a-zA-Z0-9- ]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)", 
-                                            "<img src=\"$1\" width=\"100%\"/>");
+                                            // Markdown image to html image  
+                                            Description = Regex.Replace(
+                                                Description,
+                                                "!\\[[a-zA-Z0-9- ]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
+                                                "<img src=\"$1\" width=\"100%\"/>");
+                                        }
                                     }
                                 }
                             }
-                        }
-                        break;
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var LineNumber = new StackTrace(ex, true).GetFrame(0).GetFileLineNumber();
+                    string FileName = new StackTrace(ex, true).GetFrame(0).GetFileName();
+                    logger.Error(ex, $"MetadataLocal [{FileName} {LineNumber}] ");
                 }
             }
-            catch (Exception ex)
-            {
-                var LineNumber = new StackTrace(ex, true).GetFrame(0).GetFileLineNumber();
-                string FileName = new StackTrace(ex, true).GetFrame(0).GetFileName();
-                logger.Error(ex, $"MetadataLocal [{FileName} {LineNumber}] ");
-            }
 
-            return Description;
+            if (Description.IsNullOrEmpty())
+            {
+                return base.GetDescription();
+            }
+            else
+            {
+                return Description;
+            }
         }
 
 
