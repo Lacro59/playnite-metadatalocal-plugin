@@ -21,6 +21,7 @@ namespace MetadataLocal
     public class MetadataLocalProvider : OnDemandMetadataProvider
     {
         private static readonly ILogger logger = LogManager.GetLogger();
+        private static IResourceProvider resources = new ResourceProvider();
 
         private readonly MetadataRequestOptions _options;
         private readonly MetadataLocal _plugin;
@@ -124,7 +125,7 @@ namespace MetadataLocal
                             case "xbox":
                                 if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _plugin.GetPluginUserDataPath()))
                                 {
-                                    Description = GetXboxData(gameId, PlayniteLanguage, _plugin.GetPluginUserDataPath()).GetAwaiter().GetResult();
+                                    Description = GetXboxData(gameId, PlayniteLanguage, _plugin.GetPluginUserDataPath(), _plugin).GetAwaiter().GetResult();
                                 }
                                 else
                                 {
@@ -181,7 +182,7 @@ namespace MetadataLocal
         }
 
         // Override Xbox function GetTitleInfo in WebApiClient on XboxLibrary.
-        public static async Task<string> GetXboxData(string pfn, string PlayniteLanguage, string PluginUserDataPath)
+        public static async Task<string> GetXboxData(string pfn, string PlayniteLanguage, string PluginUserDataPath, MetadataLocal plugin)
         {
             var xstsLoginTokesPath = Path.Combine(PluginUserDataPath + "\\..\\7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287", "xsts.json");
             var tokens = Serialization.FromJsonFile<AuthorizationData>(xstsLoginTokesPath);
@@ -203,7 +204,13 @@ namespace MetadataLocal
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    throw new Exception("User is not authenticated.");
+                    logger.Warn("Metadatalocal - Xbox user is not connected");
+
+                    plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
+                        $"metadalocal-xbox-error",
+                        "Xbox - " + resources.GetString("LOCNotLoggedIn"),
+                        NotificationType.Error
+                    ));
                 }
 
                 var cont = await response.Content.ReadAsStringAsync();
