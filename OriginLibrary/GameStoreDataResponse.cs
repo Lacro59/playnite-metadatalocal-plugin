@@ -37,5 +37,6 @@ namespace MetadataLocal.OriginLibrary
         public string itemId;
         public I18n i18n;
         public string offerPath;
+        public string masterTitle;
     }
 }

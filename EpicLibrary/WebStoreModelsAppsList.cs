@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MetadataLocal
 {
-    public class WebStoreModels
+    public class WebStoreModelsAppsList
     {
         public class QuerySearch
         {
@@ -31,6 +31,13 @@ namespace MetadataLocal
                 public string title;
                 public string id;
                 public string productSlug;
+                public List<KeyImages> keyImages;
+            }
+
+            public class KeyImages
+            {
+                public string type;
+                public string url;
             }
 
             public class Data

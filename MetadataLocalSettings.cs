@@ -14,6 +14,8 @@ namespace MetadataLocal
 
         public bool EnableCheckVersion { get; set; } = true;
 
+        public bool EnableSelectStore { get; set; } = false;
+
         // Playnite serializes settings object to a JSON object and saves it as text file.
         // If you want to exclude some property from being saved then use `JsonIgnore` ignore attribute.
         [JsonIgnore]
@@ -36,6 +38,8 @@ namespace MetadataLocal
             if (savedSettings != null)
             {
                 EnableCheckVersion = savedSettings.EnableCheckVersion;
+
+                EnableSelectStore = savedSettings.EnableSelectStore;
             }
         }
 

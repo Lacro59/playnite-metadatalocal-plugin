@@ -26,14 +26,14 @@ namespace MetadataLocal
             httpClient.Dispose();
         }
 
-        public async Task<List<WebStoreModels.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
+        public async Task<List<WebStoreModelsAppsList.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
         {
-            var query = new WebStoreModels.QuerySearch();
+            var query = new WebStoreModelsAppsList.QuerySearch();
             query.variables.keywords = HttpUtility.UrlPathEncode(searchTerm);
             var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync(GraphQLEndpoint, content);
-            var str = await response.Content.ReadAsStringAsync();
-            var data = Serialization.FromJson<WebStoreModels.QuerySearchResponse>(str);
+            var response = await httpClient.PostAsync(GraphQLEndpoint, content).ConfigureAwait(false);
+            var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var data = Serialization.FromJson<WebStoreModelsAppsList.QuerySearchResponse>(str);
             return data.data.Catalog.searchStore.elements;
         }
 

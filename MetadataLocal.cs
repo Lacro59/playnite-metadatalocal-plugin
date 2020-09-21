@@ -1,10 +1,12 @@
-﻿using Playnite.SDK;
+﻿using MetadataLocal.Views;
+using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using PluginCommon;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Windows.Controls;
 
 namespace MetadataLocal
 {
@@ -27,7 +29,7 @@ namespace MetadataLocal
         };
 
         // Change to something more appropriate
-        public override string Name => "Metadata Local";
+        public override string Name => "MetadataLocal";
 
         public MetadataLocal(IPlayniteAPI api) : base(api)
         {
@@ -37,6 +39,9 @@ namespace MetadataLocal
 
             // Get plugin's location 
             string pluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // Add plugin localization in application ressource.
+            PluginCommon.Localization.SetPluginLanguage(pluginFolder, api.Paths.ConfigurationPath);
 
             // Check version
             if (settings.EnableCheckVersion)
@@ -52,7 +57,7 @@ namespace MetadataLocal
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
         {
-            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath);
+            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, settings);
         }
 
         public override ISettings GetSettings(bool firstRunSettings)
@@ -60,9 +65,9 @@ namespace MetadataLocal
             return settings;
         }
 
-        //public override UserControl GetSettingsView(bool firstRunSettings)
-        //{
-        //    return new MetadataLocalSettingsView();
-        //}
+        public override UserControl GetSettingsView(bool firstRunSettings)
+        {
+            return new MetadataLocalSettingsView();
+        }
     }
 }
