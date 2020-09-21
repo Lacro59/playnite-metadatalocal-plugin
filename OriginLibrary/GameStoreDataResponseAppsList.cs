@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MetadataLocal.OriginLibrary
+﻿namespace MetadataLocal.OriginLibrary
 {
     public class GameStoreDataResponseAppsList
     {
