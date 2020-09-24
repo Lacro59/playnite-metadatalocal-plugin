@@ -238,11 +238,11 @@ namespace MetadataLocal
                         {
                             Description = Description.Replace("\n", "\n<br>");
 
-                            //![rl_s1_section_challenges.jpg](https://cdn2.unrealengine.com/rl-s1-section-challenges-3840x2160-073994219.jpg)
+                            // TODO Use with new SDK gameInfo.Description = Markup.MarkdownToHtml(page.data.about.description);
                             // Markdown image to html image  
                             Description = Regex.Replace(
                                 Description,
-                                "!\\[[a-zA-Z0-9- ]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
+                                "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
                                 "<img src=\"$1\" width=\"100%\"/>");
                         }
                     }
