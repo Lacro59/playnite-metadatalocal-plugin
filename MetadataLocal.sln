@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.1145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetadataLocal", "MetadataLocal.csproj", "{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginCommon", "playnite-plugincommon\PluginCommon.csproj", "{E05AC297-6067-4270-A572-1DF926BB3635}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A54423D1-8E7A-4339-B0D5-24E7CEFE469B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E05AC297-6067-4270-A572-1DF926BB3635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E05AC297-6067-4270-A572-1DF926BB3635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E05AC297-6067-4270-A572-1DF926BB3635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E05AC297-6067-4270-A572-1DF926BB3635}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
