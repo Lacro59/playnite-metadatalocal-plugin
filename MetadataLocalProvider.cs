@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 using PluginCommon;
-using Playnite.Common.Web;
+using PluginCommon.PlayniteResources;
+using PluginCommon.PlayniteResources.API;
+using PluginCommon.PlayniteResources.Common;
+using PluginCommon.PlayniteResources.Converters;
 using Newtonsoft.Json;
 using System.Text;
 using System.Net.Http;
@@ -13,7 +16,6 @@ using Playnite.SDK;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MetadataLocal.XboxLibrary;
-using Playnite.Common;
 using System.IO;
 using MetadataLocal.Views;
 using System.Windows;
@@ -184,20 +186,36 @@ namespace MetadataLocal
         // Override Steam function GetRawStoreAppDetail in WebApiClient on SteamLibrary.
         public static string GetSteamData(uint appId, string PlayniteLanguage)
         {
-            string SteamLangCode = CodeLang.GetSteamLang(PlayniteLanguage);
-            var url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l={SteamLangCode}";
-            return HttpDownloader.DownloadString(url);
+            string url = string.Empty;
+            try
+            {
+                string SteamLangCode = CodeLang.GetSteamLang(PlayniteLanguage);
+                url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l={SteamLangCode}";
+                return Web.DownloadStringData(url).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                return string.Empty;
+            }
         }
 
         // Override Origin function GetGameStoreData in OriginApiClient on OriginLibrary.
         public static string GetOriginData(string gameId, string PlayniteLanguage)
         {
+            string url = string.Empty;
+            try { 
             string OriginLang = CodeLang.GetOriginLang(PlayniteLanguage);
             string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
-            var url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}",
-                gameId, OriginLang, OriginLangCountry);
-            var stringData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
+            url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
+            var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
             return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                return string.Empty;
+            }
         }
 
         public static string GetEpicData(string gameName)
@@ -366,57 +384,13 @@ namespace MetadataLocal
                         var title = OriginGame.gameName.Trim(); ;
                         var img = OriginGame.image;
 
-
-                        //Get Id
-                        // TODO Set in PluginCommon
-                        string PluginCachePath = PluginUserDataPath + "\\cache\\";
-                        string PluginCacheFile = PluginCachePath + "\\OriginListApp.json";
-                        List<GameStoreDataResponseAppsList> OriginListApp = new List<GameStoreDataResponseAppsList>();
-
-                        if (!Directory.Exists(PluginCachePath))
-                        {
-                            Directory.CreateDirectory(PluginCachePath);
-                        }
-
-                        // From cache if it exists
-                        if (File.Exists(PluginCacheFile))
-                        {
-                            // If not expired
-                            if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
-                            {
-                                OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
-                            }
-                            else
-                            {
-                                result = GetData(string.Format(listGamesUrl)).GetAwaiter().GetResult();
-
-                                resultObject = JObject.Parse(result);
-                                stringData = JsonConvert.SerializeObject(resultObject["offers"]);
-                                OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(stringData);
-                                // Write file for cache usage
-                                File.WriteAllText(PluginCacheFile, JsonConvert.SerializeObject(OriginListApp));
-                            }
-                        }
-                        else
-                        {
-                            result = GetData(string.Format(listGamesUrl)).GetAwaiter().GetResult();
-
-                            resultObject = JObject.Parse(result);
-                            stringData = JsonConvert.SerializeObject(resultObject["offers"]);
-                            OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(stringData);
-                            // Write file for cache usage
-                            File.WriteAllText(PluginCacheFile, JsonConvert.SerializeObject(OriginListApp));
-                        }
-
-                        var findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == title.ToLower());
-
+                        OriginApi originApi = new OriginApi(PluginUserDataPath);
+                        string gameId = originApi.GetOriginId(title);
 #if DEBUG
-                        logger.Debug($"MetadataLocal - Find for {title} - {JsonConvert.SerializeObject(findGame)}");
+                        logger.Debug($"MetadataLocal - Find for {title} - {gameId}");
 #endif
-                        if (findGame != null)
+                        if (!gameId.IsNullOrEmpty())
                         {
-                            string gameId = findGame.offerId ?? string.Empty;
-
                             results.Add(new SearchResult
                             {
                                 Name = title,
