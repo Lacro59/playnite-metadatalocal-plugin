@@ -4,3 +4,8 @@ Version: 0.5
 Module: MetadataLocal.dll
 Type: MetadataProvider
 Icon: icon.png
+Links:
+  - Name: Plugin forum
+    Url: https://playnite.link/forum/thread-291.html
+  - Name: Plugin Github
+    Url: https://github.com/Lacro59/playnite-metadatalocal-plugin
