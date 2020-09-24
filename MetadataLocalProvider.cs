@@ -183,7 +183,6 @@ namespace MetadataLocal
 
 
         #region Search one to one
-        // Override Steam function GetRawStoreAppDetail in WebApiClient on SteamLibrary.
         public static string GetSteamData(uint appId, string PlayniteLanguage)
         {
             string url = string.Empty;
@@ -200,7 +199,6 @@ namespace MetadataLocal
             }
         }
 
-        // Override Origin function GetGameStoreData in OriginApiClient on OriginLibrary.
         public static string GetOriginData(string gameId, string PlayniteLanguage)
         {
             string url = string.Empty;
@@ -296,20 +294,6 @@ namespace MetadataLocal
         #endregion
 
 
-        public static async Task<string> GetData(string url)
-        {
-            HttpClientHandler handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-
-            using (HttpClient client = new HttpClient(handler))
-            {
-                return client.GetStringAsync(url).GetAwaiter().GetResult();
-            }
-        }
-
-
         #region Search one to many
         // From UniversalSteamMetadata
         public static List<SearchResult> GetMultiSteamData(string searchTerm)
@@ -363,15 +347,13 @@ namespace MetadataLocal
 #if DEBUG
             logger.Debug($"MetadataLocal - GetMultiOriginData({searchTerm})");
 #endif
-            string baseUrl = @"https://www.origin.com/";
-            string listGamesUrl = @"https://api3.origin.com/supercat/FR/fr_FR/supercat-PCWIN_MAC-FR-fr_FR.json.gz";
-            //string searchUrl = @"https://www.origin.com/fra/fr-fr/search?searchString={0}";
+
             string searchUrl = @"https://api1.origin.com/xsearch/store/fr_fr/fra/products?searchTerm={0}&start=0&rows=20&isGDP=true";
             var results = new List<SearchResult>();
 
             try
             {
-                string result = GetData(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
+                string result = Web.DownloadStringDataWithGz(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
 
                 JObject resultObject = JObject.Parse(result);
                 string stringData = JsonConvert.SerializeObject(resultObject["games"]["game"]);
