@@ -25,6 +25,7 @@ using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Newtonsoft.Json.Linq;
+using Playnite.SDK.Data;
 
 namespace MetadataLocal
 {
@@ -148,7 +149,7 @@ namespace MetadataLocal
                             break;
 
                         case "xbox":
-                            if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _plugin.GetPluginUserDataPath()))
+                            if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _PlayniteConfigurationPath))
                             {
                                 Description = GetXboxData(GameId, PlayniteLanguage, _plugin.GetPluginUserDataPath(), _plugin).GetAwaiter().GetResult();
                             }
@@ -237,13 +238,7 @@ namespace MetadataLocal
                         if (!Description.IsNullOrEmpty())
                         {
                             Description = Description.Replace("\n", "\n<br>");
-
-                            // TODO Use with new SDK gameInfo.Description = Markup.MarkdownToHtml(page.data.about.description);
-                            // Markdown image to html image  
-                            Description = Regex.Replace(
-                                Description,
-                                "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
-                                "<img src=\"$1\" width=\"100%\"/>");
+                            Description = Markup.MarkdownToHtml(Description);
                         }
                     }
                 }
