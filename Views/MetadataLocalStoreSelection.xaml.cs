@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Playnite.Controls;
 using Playnite.SDK;
 using PluginCommon;
 using PluginCommon.PlayniteResources;
@@ -28,7 +27,7 @@ namespace MetadataLocal.Views
     /// <summary>
     /// Logique d'interaction pour MetadataLocalStoreSelection.xaml
     /// </summary>
-    public partial class MetadataLocalStoreSelection : WindowBase
+    public partial class MetadataLocalStoreSelection : Window
     {
         private static readonly ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI _PlayniteApi;
