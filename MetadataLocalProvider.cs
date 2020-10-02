@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 using PluginCommon;
-using Playnite.Common.Web;
+using PluginCommon.PlayniteResources;
+using PluginCommon.PlayniteResources.API;
+using PluginCommon.PlayniteResources.Common;
+using PluginCommon.PlayniteResources.Converters;
 using Newtonsoft.Json;
 using System.Text;
 using System.Net.Http;
@@ -13,7 +16,6 @@ using Playnite.SDK;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MetadataLocal.XboxLibrary;
-using Playnite.Common;
 using System.IO;
 using MetadataLocal.Views;
 using System.Windows;
@@ -23,6 +25,7 @@ using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Newtonsoft.Json.Linq;
+using Playnite.SDK.Data;
 
 namespace MetadataLocal
 {
@@ -146,7 +149,7 @@ namespace MetadataLocal
                             break;
 
                         case "xbox":
-                            if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _plugin.GetPluginUserDataPath()))
+                            if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _PlayniteConfigurationPath))
                             {
                                 Description = GetXboxData(GameId, PlayniteLanguage, _plugin.GetPluginUserDataPath(), _plugin).GetAwaiter().GetResult();
                             }
@@ -181,23 +184,37 @@ namespace MetadataLocal
 
 
         #region Search one to one
-        // Override Steam function GetRawStoreAppDetail in WebApiClient on SteamLibrary.
         public static string GetSteamData(uint appId, string PlayniteLanguage)
         {
-            string SteamLangCode = CodeLang.GetSteamLang(PlayniteLanguage);
-            var url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l={SteamLangCode}";
-            return HttpDownloader.DownloadString(url);
+            string url = string.Empty;
+            try
+            {
+                string SteamLangCode = CodeLang.GetSteamLang(PlayniteLanguage);
+                url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l={SteamLangCode}";
+                return Web.DownloadStringData(url).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                return string.Empty;
+            }
         }
 
-        // Override Origin function GetGameStoreData in OriginApiClient on OriginLibrary.
         public static string GetOriginData(string gameId, string PlayniteLanguage)
         {
+            string url = string.Empty;
+            try { 
             string OriginLang = CodeLang.GetOriginLang(PlayniteLanguage);
             string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
-            var url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}",
-                gameId, OriginLang, OriginLangCountry);
-            var stringData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
+            url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
+            var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
             return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                return string.Empty;
+            }
         }
 
         public static string GetEpicData(string gameName)
@@ -221,13 +238,7 @@ namespace MetadataLocal
                         if (!Description.IsNullOrEmpty())
                         {
                             Description = Description.Replace("\n", "\n<br>");
-
-                            //![rl_s1_section_challenges.jpg](https://cdn2.unrealengine.com/rl-s1-section-challenges-3840x2160-073994219.jpg)
-                            // Markdown image to html image  
-                            Description = Regex.Replace(
-                                Description,
-                                "!\\[[a-zA-Z0-9- ]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
-                                "<img src=\"$1\" width=\"100%\"/>");
+                            Description = Markup.MarkdownToHtml(Description);
                         }
                     }
                 }
@@ -276,20 +287,6 @@ namespace MetadataLocal
             }
         }
         #endregion
-
-
-        public static async Task<string> GetData(string url)
-        {
-            HttpClientHandler handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-
-            using (HttpClient client = new HttpClient(handler))
-            {
-                return client.GetStringAsync(url).GetAwaiter().GetResult();
-            }
-        }
 
 
         #region Search one to many
@@ -345,15 +342,13 @@ namespace MetadataLocal
 #if DEBUG
             logger.Debug($"MetadataLocal - GetMultiOriginData({searchTerm})");
 #endif
-            string baseUrl = @"https://www.origin.com/";
-            string listGamesUrl = @"https://api3.origin.com/supercat/FR/fr_FR/supercat-PCWIN_MAC-FR-fr_FR.json.gz";
-            //string searchUrl = @"https://www.origin.com/fra/fr-fr/search?searchString={0}";
+
             string searchUrl = @"https://api1.origin.com/xsearch/store/fr_fr/fra/products?searchTerm={0}&start=0&rows=20&isGDP=true";
             var results = new List<SearchResult>();
 
             try
             {
-                string result = GetData(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
+                string result = Web.DownloadStringDataWithGz(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
 
                 JObject resultObject = JObject.Parse(result);
                 string stringData = JsonConvert.SerializeObject(resultObject["games"]["game"]);
@@ -366,57 +361,13 @@ namespace MetadataLocal
                         var title = OriginGame.gameName.Trim(); ;
                         var img = OriginGame.image;
 
-
-                        //Get Id
-                        // TODO Set in PluginCommon
-                        string PluginCachePath = PluginUserDataPath + "\\cache\\";
-                        string PluginCacheFile = PluginCachePath + "\\OriginListApp.json";
-                        List<GameStoreDataResponseAppsList> OriginListApp = new List<GameStoreDataResponseAppsList>();
-
-                        if (!Directory.Exists(PluginCachePath))
-                        {
-                            Directory.CreateDirectory(PluginCachePath);
-                        }
-
-                        // From cache if it exists
-                        if (File.Exists(PluginCacheFile))
-                        {
-                            // If not expired
-                            if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
-                            {
-                                OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
-                            }
-                            else
-                            {
-                                result = GetData(string.Format(listGamesUrl)).GetAwaiter().GetResult();
-
-                                resultObject = JObject.Parse(result);
-                                stringData = JsonConvert.SerializeObject(resultObject["offers"]);
-                                OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(stringData);
-                                // Write file for cache usage
-                                File.WriteAllText(PluginCacheFile, JsonConvert.SerializeObject(OriginListApp));
-                            }
-                        }
-                        else
-                        {
-                            result = GetData(string.Format(listGamesUrl)).GetAwaiter().GetResult();
-
-                            resultObject = JObject.Parse(result);
-                            stringData = JsonConvert.SerializeObject(resultObject["offers"]);
-                            OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(stringData);
-                            // Write file for cache usage
-                            File.WriteAllText(PluginCacheFile, JsonConvert.SerializeObject(OriginListApp));
-                        }
-
-                        var findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == title.ToLower());
-
+                        OriginApi originApi = new OriginApi(PluginUserDataPath);
+                        string gameId = originApi.GetOriginId(title);
 #if DEBUG
-                        logger.Debug($"MetadataLocal - Find for {title} - {JsonConvert.SerializeObject(findGame)}");
+                        logger.Debug($"MetadataLocal - Find for {title} - {gameId}");
 #endif
-                        if (findGame != null)
+                        if (!gameId.IsNullOrEmpty())
                         {
-                            string gameId = findGame.offerId ?? string.Empty;
-
                             results.Add(new SearchResult
                             {
                                 Name = title,

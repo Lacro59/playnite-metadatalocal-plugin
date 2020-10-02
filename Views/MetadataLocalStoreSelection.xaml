@@ -1,14 +1,15 @@
-﻿<controls:WindowBase
-    xmlns:controls="clr-namespace:Playnite.Controls;assembly=Playnite" x:Class="MetadataLocal.Views.MetadataLocalStoreSelection"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" Height="550" Width="700" 
-             d:DesignStyle="{StaticResource WindowDesignStyle}"
-             Style="{DynamicResource StandardWindowStyle}"
-             Background="{DynamicResource WindowBackgourndBrush}"
-             ResizeMode="NoResize" Title="{DynamicResource LOCMetadataLocalStoreSelection}" WindowStartupLocation="CenterScreen" WindowStyle="None">
+﻿<Window x:Class="MetadataLocal.Views.MetadataLocalStoreSelection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        mc:Ignorable="d" Height="560" Width="700" 
+        Background="{DynamicResource WindowBackgourndBrush}"
+        ResizeMode="NoResize" Title="{DynamicResource LOCMetadataLocalStoreSelection}" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow">
+
+    <Window.Resources>
+        <FontFamily x:Key="font">pack://application:,,,/PluginCommon;component/Resources/font.ttf#font</FontFamily>
+    </Window.Resources>
 
     <Grid>
         <Grid Name="PART_DataLoadWishlist">
@@ -47,7 +48,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="0" Name="rbSteam"
                          Tag="Steam" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0">
                     <DockPanel Width="100" Height="90">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="/MetadataLocal;component/Resources/#font" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
 
@@ -58,7 +59,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbEpic"
                          Tag="Epic" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0">
                     <DockPanel Width="100" Height="90">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="/MetadataLocal;component/Resources/#font" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
 
@@ -69,7 +70,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="2" Name="rbOrigin"
                          Tag="Origin" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0">
                     <DockPanel Width="100" Height="90">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="/MetadataLocal;component/Resources/#font" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            Foreground="{Binding ElementName=rbOrigin, Path=Foreground}"
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0" />
 
@@ -80,7 +81,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbXbox"
                          Tag="Xbox" Click="Button_Click" Width="100" Height="90" Padding="0">
                     <DockPanel Width="100" Height="90">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="/MetadataLocal;component/Resources/#font" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
 
@@ -129,4 +130,4 @@
             </StackPanel>
         </Grid>
     </Grid>
-</controls:WindowBase>
+</Window>
