@@ -1,4 +1,5 @@
-﻿using PluginCommon;
+﻿using Playnite.SDK.Data;
+using PluginCommon;
 using PluginCommon.PlayniteResources;
 using PluginCommon.PlayniteResources.API;
 using PluginCommon.PlayniteResources.Common;

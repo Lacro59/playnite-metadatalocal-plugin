@@ -84,7 +84,7 @@ namespace MetadataLocal
             if (AvailableFields.Contains(MetadataField.Description))
             {
                 // Get Playnite language
-                PlayniteLanguage = PluginCommon.Localization.GetPlayniteLanguageConfiguration(_PlayniteConfigurationPath);
+                PlayniteLanguage = _plugin.PlayniteApi.ApplicationSettings.Language;
 
                 string GameId = string.Empty;
                 string GameName = string.Empty;
@@ -108,19 +108,20 @@ namespace MetadataLocal
                     // Selectable Store metadata
                     if (!_options.IsBackgroundDownload && _settings.EnableSelectStore)
                     {
-                        MetadataLocalStoreSelection wpfDialog = null;
-                        bool? wpfResult = null;
+                        MetadataLocalStoreSelection ViewExtension = null;
                         Application.Current.Dispatcher.Invoke(new Action(() =>
                         {
-                            wpfDialog = new MetadataLocalStoreSelection(_plugin.PlayniteApi, StoreName, GameName, _plugin.GetPluginUserDataPath());
-                            wpfResult = wpfDialog.ShowDialog();
+                            ViewExtension = new MetadataLocalStoreSelection(_plugin.PlayniteApi, StoreName, GameName, _plugin.GetPluginUserDataPath());
+                            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(_plugin.PlayniteApi, resources.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
+                            windowExtension.ShowDialog();
+
                         }));
 
-                        if(!wpfDialog.StoreResult.StoreName.IsNullOrEmpty())
+                        if(!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
                         {
-                            GameId = wpfDialog.StoreResult.StoreId;
-                            GameName = wpfDialog.StoreResult.Name;
-                            StoreName = wpfDialog.StoreResult.StoreName;
+                            GameId = ViewExtension.StoreResult.StoreId;
+                            GameName = ViewExtension.StoreResult.Name;
+                            StoreName = ViewExtension.StoreResult.StoreName;
                         }
                         else
                         {
@@ -149,7 +150,7 @@ namespace MetadataLocal
                             break;
 
                         case "xbox":
-                            if (!Tools.IsDisabledPlaynitePlugins("XboxLibrary", _PlayniteConfigurationPath))
+                            if (!PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary", _PlayniteConfigurationPath))
                             {
                                 Description = GetXboxData(GameId, PlayniteLanguage, _plugin.GetPluginUserDataPath(), _plugin).GetAwaiter().GetResult();
                             }

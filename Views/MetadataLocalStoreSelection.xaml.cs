@@ -27,14 +27,13 @@ namespace MetadataLocal.Views
     /// <summary>
     /// Logique d'interaction pour MetadataLocalStoreSelection.xaml
     /// </summary>
-    public partial class MetadataLocalStoreSelection : Window
+    public partial class MetadataLocalStoreSelection : UserControl
     {
         private static readonly ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI _PlayniteApi;
 
         public string _PluginUserDataPath { get; set; }
         public SearchResult StoreResult { get; set; } = new SearchResult();
-
 
         public MetadataLocalStoreSelection(IPlayniteAPI PlayniteApi, string StoreDefault, string GameName, string PluginUserDataPath)
         {
@@ -45,8 +44,6 @@ namespace MetadataLocal.Views
 
             PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
             PART_GridData.IsEnabled = true;
-
-            this.PreviewKeyDown += new KeyEventHandler(HandleEsc);
 
             switch (StoreDefault.ToLower())
             {
@@ -76,20 +73,6 @@ namespace MetadataLocal.Views
             SearchElements();
         }
 
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
-        {
-            Tools.DesactivePlayniteWindowControl(this);
-        }
-
-        private void HandleEsc(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                Close();
-            }
-        }
-
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             lbSelectable.ItemsSource = null;
@@ -99,13 +82,13 @@ namespace MetadataLocal.Views
 
         private void BtCancel_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            ((Window)this.Parent).Close();
         }
 
         private void BtOk_Click(object sender, RoutedEventArgs e)
         {
             StoreResult = (SearchResult)lbSelectable.SelectedItem;
-            Close();
+            ((Window)this.Parent).Close();
         }
 
 
