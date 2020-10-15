@@ -102,6 +102,31 @@ namespace MetadataLocal.Views
             SearchElements();
         }
 
+        private void Rb_Check(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+
+            if (rb.Name == "rbSteam" && (bool)rb.IsChecked)
+            {
+                SearchElements();
+            }
+
+            if (rb.Name == "rbEpic" && (bool)rb.IsChecked)
+            {
+                SearchElements();
+            }
+
+            if (rb.Name == "rbOrigin" && (bool)rb.IsChecked)
+            {
+                SearchElements();
+            }
+
+            if (rb.Name == "rbXbox" && (bool)rb.IsChecked)
+            {
+                SearchElements();
+            }
+        }
+
         private void SearchElement_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
