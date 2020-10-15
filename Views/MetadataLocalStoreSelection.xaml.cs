@@ -13,14 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Threading;
+using System.Globalization;
 
 namespace MetadataLocal.Views
 {
@@ -34,6 +27,8 @@ namespace MetadataLocal.Views
 
         public string _PluginUserDataPath { get; set; }
         public SearchResult StoreResult { get; set; } = new SearchResult();
+
+        public bool IsFirstLoad = true;
 
         public MetadataLocalStoreSelection(IPlayniteAPI PlayniteApi, string StoreDefault, string GameName, string PluginUserDataPath)
         {
@@ -71,6 +66,7 @@ namespace MetadataLocal.Views
             SearchElement.Text = GameName;
 
             SearchElements();
+            IsFirstLoad = false;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -104,26 +100,28 @@ namespace MetadataLocal.Views
 
         private void Rb_Check(object sender, RoutedEventArgs e)
         {
-            RadioButton rb = sender as RadioButton;
-
-            if (rb.Name == "rbSteam" && (bool)rb.IsChecked)
+            if (!IsFirstLoad)
             {
-                SearchElements();
-            }
+                RadioButton rb = sender as RadioButton;
+                if (rb.Name == "rbSteam" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
 
-            if (rb.Name == "rbEpic" && (bool)rb.IsChecked)
-            {
-                SearchElements();
-            }
+                if (rb.Name == "rbEpic" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
 
-            if (rb.Name == "rbOrigin" && (bool)rb.IsChecked)
-            {
-                SearchElements();
-            }
+                if (rb.Name == "rbOrigin" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
 
-            if (rb.Name == "rbXbox" && (bool)rb.IsChecked)
-            {
-                SearchElements();
+                if (rb.Name == "rbXbox" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
             }
         }
 
@@ -146,7 +144,7 @@ namespace MetadataLocal.Views
             PART_DataLoadWishlist.Visibility = Visibility.Visible;
             PART_GridData.IsEnabled = false;
 
-            string gameSearch = SearchElement.Text;
+            string gameSearch = RemoveAccents(SearchElement.Text);
 
             Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox))
                 .ContinueWith(antecedent =>
@@ -159,10 +157,22 @@ namespace MetadataLocal.Views
                         PART_GridData.IsEnabled = true;
 
 #if DEBUG
-                        logger.Debug("MetadataLocal - SearchElements() - " + JsonConvert.SerializeObject(antecedent.Result));
+                        logger.Debug($"MetadataLocal - SearchElements({gameSearch}) - " + JsonConvert.SerializeObject(antecedent.Result));
 #endif
                     }));
                 });
+        }
+
+        private string RemoveAccents(string text)
+        {
+            StringBuilder sbReturn = new StringBuilder();
+            var arrayText = text.Normalize(NormalizationForm.FormD).ToCharArray();
+            foreach (char letter in arrayText)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(letter) != UnicodeCategory.NonSpacingMark)
+                    sbReturn.Append(letter);
+            }
+            return sbReturn.ToString();
         }
 
         private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox)
