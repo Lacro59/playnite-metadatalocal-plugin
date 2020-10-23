@@ -2,15 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
-    <!--
-    MetadataLocalStoreSelection
-    -->
+    <!-- MetadataLocalStoreSelection -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelection">Store source selection</sys:String>
 
-    <!--
-    MetadataLocalSettingsView
-    -->
+    <!-- MetadataLocalSettingsView -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelect">Enable store selection for localised description</sys:String>
 
