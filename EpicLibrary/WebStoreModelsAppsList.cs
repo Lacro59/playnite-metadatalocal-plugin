@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MetadataLocal
+namespace MetadataLocal.EpicLibrary
 {
     public class WebStoreModelsAppsList
     {

@@ -26,6 +26,7 @@ using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK.Data;
+using MetadataLocal.EpicLibrary;
 
 namespace MetadataLocal
 {
@@ -229,7 +230,7 @@ namespace MetadataLocal
                     var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
                     if (product.pages.HasItems())
                     {
-                        var page = product.pages.FirstOrDefault(a => a.type == "productHome");
+                        var page = product.pages.FirstOrDefault(a => a.type is string type && type == "productHome");
                         if (page == null)
                         {
                             page = product.pages[0];
@@ -251,7 +252,7 @@ namespace MetadataLocal
         public static async Task<string> GetXboxData(string pfn, string PlayniteLanguage, string PluginUserDataPath, MetadataLocal plugin)
         {
             var xstsLoginTokesPath = Path.Combine(PluginUserDataPath + "\\..\\7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287", "xsts.json");
-            var tokens = Serialization.FromJsonFile<AuthorizationData>(xstsLoginTokesPath);
+            var tokens = Playnite.SDK.Data.Serialization.FromJsonFile<AuthorizationData>(xstsLoginTokesPath);
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("x-xbl-contract-version", "2");
@@ -266,7 +267,7 @@ namespace MetadataLocal
 
                 var response = await client.PostAsync(
                            @"https://titlehub.xboxlive.com/titles/batch/decoration/detail",
-                           new StringContent(Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
+                           new StringContent(Playnite.SDK.Data.Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
@@ -282,7 +283,7 @@ namespace MetadataLocal
                 else
                 {
                     var cont = await response.Content.ReadAsStringAsync();
-                    var titleHistory = Serialization.FromJson<TitleHistoryResponse>(cont);
+                    var titleHistory = Playnite.SDK.Data.Serialization.FromJson<TitleHistoryResponse>(cont);
                     return titleHistory.titles.First().detail.description;
                 }
             }

@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace MetadataLocal
+namespace MetadataLocal.EpicLibrary
 {
     public class WebStoreClient : IDisposable
     {
@@ -34,10 +34,10 @@ namespace MetadataLocal
         {
             var query = new WebStoreModelsAppsList.QuerySearch();
             query.variables.keywords = HttpUtility.UrlPathEncode(searchTerm);
-            var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
+            var content = new StringContent(Playnite.SDK.Data.Serialization.ToJson(query), Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync(GraphQLEndpoint, content).ConfigureAwait(false);
             var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var data = Serialization.FromJson<WebStoreModelsAppsList.QuerySearchResponse>(str);
+            var data = Playnite.SDK.Data.Serialization.FromJson<WebStoreModelsAppsList.QuerySearchResponse>(str);
             return data.data.Catalog.searchStore.elements;
         }
 
@@ -51,7 +51,7 @@ namespace MetadataLocal
             var slugUri = productSlug.Split('/').First();
             var productUrl = string.Format(ProductUrlBase, slugUri, EpicLangCountry);
             var str = await httpClient.GetStringAsync(productUrl);
-            return Serialization.FromJson<WebStoreModels.ProductResponse>(str);
+            return Playnite.SDK.Data.Serialization.FromJson<WebStoreModels.ProductResponse>(str);
         }
     }
 }
