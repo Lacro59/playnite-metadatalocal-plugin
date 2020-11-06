@@ -11,11 +11,9 @@ using System.Text;
 using System.Net.Http;
 using System.Linq;
 using MetadataLocal.OriginLibrary;
-using MetadataLocal.SteamLibrary;
 using Playnite.SDK;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using MetadataLocal.XboxLibrary;
 using System.IO;
 using MetadataLocal.Views;
 using System.Windows;
@@ -27,6 +25,9 @@ using AngleSharp.Dom.Html;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK.Data;
 using MetadataLocal.EpicLibrary;
+using PluginCommon.PlayniteResources.PluginLibrary.SteamLibrary.SteamShared;
+using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
+using PluginCommon.PlayniteResources.PluginLibrary.XboxLibrary.Models;
 
 namespace MetadataLocal
 {
@@ -241,6 +242,10 @@ namespace MetadataLocal
                         {
                             Description = Description.Replace("\n", "\n<br>");
                             Description = Markup.MarkdownToHtml(Description);
+                            Description = Regex.Replace(
+                                Description,
+                                "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
+                                "<img src=\"$1\"/>");
                         }
                     }
                 }
