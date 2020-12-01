@@ -146,12 +146,15 @@ namespace MetadataLocal.Views
 
             string gameSearch = RemoveAccents(SearchElement.Text);
 
+            lbSelectable.ItemsSource = null;
             Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox))
                 .ContinueWith(antecedent =>
                 {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        lbSelectable.ItemsSource = antecedent.Result;
-                        lbSelectable.UpdateLayout();
+                    this.Dispatcher.Invoke(new Action(() => {
+                        if (antecedent.Result != null)
+                        {
+                            lbSelectable.ItemsSource = antecedent.Result;
+                        }
             
                         PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
                         PART_GridData.IsEnabled = true;

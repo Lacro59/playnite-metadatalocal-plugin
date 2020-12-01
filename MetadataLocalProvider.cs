@@ -304,35 +304,57 @@ namespace MetadataLocal
             logger.Debug($"MetadataLocal - GetMultiSteamData({searchTerm})");
 #endif
 
-            string searchUrl = @"https://store.steampowered.com/search/?term={0}&category1=998";
             var results = new List<SearchResult>();
+            string searchUrl = string.Empty;
 
             try
             {
-                using (var webClient = new WebClient { Encoding = Encoding.UTF8 })
+                if (uint.TryParse(searchTerm, out var appId))
                 {
-                    var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, searchTerm));
-                    var parser = new HtmlParser();
-                    var searchPage = parser.Parse(searchPageSrc);
-
-                    foreach (var gameElem in searchPage.QuerySelectorAll(".search_result_row"))
+                    using (var webClient = new WebClient { Encoding = Encoding.UTF8 })
                     {
-                        var title = gameElem.QuerySelector(".title").InnerHtml;
-                        var img = gameElem.QuerySelector(".search_capsule img").GetAttribute("src");
-                        var releaseDate = gameElem.QuerySelector(".search_released").InnerHtml;
-                        if (gameElem.HasAttribute("data-ds-packageid"))
-                        {
-                            continue;
-                        }
-                        var gameId = gameElem.GetAttribute("data-ds-appid");
+                        searchUrl = @"https://store.steampowered.com/api/appdetails?appids={0}";
+                        var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, appId));
+                        var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
+                        var response = parsedData[appId.ToString()];
 
                         results.Add(new SearchResult
                         {
-                            Name = HttpUtility.HtmlDecode(title),
-                            ImageUrl = img,
+                            Name = response.data.name,
+                            ImageUrl = response.data.header_image,
                             StoreName = "Steam",
-                            StoreId = gameId
+                            StoreId = appId.ToString()
                         });
+                    }
+                }
+                else
+                {
+                    using (var webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    {
+                        searchUrl = @"https://store.steampowered.com/search/?term={0}";
+                        var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, searchTerm));
+                        var parser = new HtmlParser();
+                        var searchPage = parser.Parse(searchPageSrc);
+
+                        foreach (var gameElem in searchPage.QuerySelectorAll(".search_result_row"))
+                        {
+                            var title = gameElem.QuerySelector(".title").InnerHtml;
+                            var img = gameElem.QuerySelector(".search_capsule img").GetAttribute("src");
+                            var releaseDate = gameElem.QuerySelector(".search_released").InnerHtml;
+                            if (gameElem.HasAttribute("data-ds-packageid"))
+                            {
+                                continue;
+                            }
+                            var gameId = gameElem.GetAttribute("data-ds-appid");
+
+                            results.Add(new SearchResult
+                            {
+                                Name = HttpUtility.HtmlDecode(title),
+                                ImageUrl = img,
+                                StoreName = "Steam",
+                                StoreId = gameId
+                            });
+                        }
                     }
                 }
             }
