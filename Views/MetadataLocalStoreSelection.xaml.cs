@@ -58,6 +58,12 @@ namespace MetadataLocal.Views
                     rbXbox.IsChecked = true;
                     break;
 
+                case "ubisoft":
+                case "uplay":
+                case "ubisoft connect":
+                    rbUbisoft.IsChecked = true;
+                    break;
+
                 default:
                     rbSteam.IsChecked = true;
                     break;
@@ -122,6 +128,11 @@ namespace MetadataLocal.Views
                 {
                     SearchElements();
                 }
+
+                if (rb.Name == "rbUbisoft" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
             }
         }
 
@@ -140,6 +151,7 @@ namespace MetadataLocal.Views
             bool IsOrigin = (bool)rbOrigin.IsChecked;
             bool IsEpic = (bool)rbEpic.IsChecked;
             bool IsXbox = (bool)rbXbox.IsChecked;
+            bool IsUbisoft = (bool)rbUbisoft.IsChecked;
 
             PART_DataLoadWishlist.Visibility = Visibility.Visible;
             PART_GridData.IsEnabled = false;
@@ -147,7 +159,7 @@ namespace MetadataLocal.Views
             string gameSearch = RemoveAccents(SearchElement.Text);
 
             lbSelectable.ItemsSource = null;
-            Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox))
+            Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft))
                 .ContinueWith(antecedent =>
                 {
                     this.Dispatcher.Invoke(new Action(() => {
@@ -178,7 +190,7 @@ namespace MetadataLocal.Views
             return sbReturn.ToString();
         }
 
-        private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox)
+        private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft)
         {
             var results = new List<SearchResult>();
 
@@ -200,6 +212,11 @@ namespace MetadataLocal.Views
             if (IsXbox)
             {
                 results = MetadataLocalProvider.GetMultiXboxData(_PlayniteApi, SearchElement);
+            }
+
+            if (IsUbisoft)
+            {
+                results = MetadataLocalProvider.GetMultiUbisoftData(_PlayniteApi, SearchElement);
             }
 
             return results;

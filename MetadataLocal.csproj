@@ -62,6 +62,7 @@
     <Compile Include="MetadataLocal.cs" />
     <Compile Include="MetadataLocalProvider.cs" />
     <Compile Include="MetadataLocalSettings.cs" />
+    <Compile Include="UbisoftLibrary\GameStoreSearchResponse.cs" />
     <Compile Include="Views\MetadataLocalSettingsView.xaml.cs">
       <DependentUpon>MetadataLocalSettingsView.xaml</DependentUpon>
     </Compile>

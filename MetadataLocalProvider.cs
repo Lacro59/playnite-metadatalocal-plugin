@@ -28,6 +28,7 @@ using MetadataLocal.EpicLibrary;
 using PluginCommon.PlayniteResources.PluginLibrary.SteamLibrary.SteamShared;
 using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
 using PluginCommon.PlayniteResources.PluginLibrary.XboxLibrary.Models;
+using MetadataLocal.UbisoftLibrary;
 
 namespace MetadataLocal
 {
@@ -116,7 +117,6 @@ namespace MetadataLocal
                             ViewExtension = new MetadataLocalStoreSelection(_plugin.PlayniteApi, StoreName, GameName, _plugin.GetPluginUserDataPath());
                             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(_plugin.PlayniteApi, resources.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
                             windowExtension.ShowDialog();
-
                         }));
 
                         if(!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
@@ -166,6 +166,11 @@ namespace MetadataLocal
                                     () => _plugin.OpenSettingsView()
                                 ));
                             }
+                            break;
+                        case "ubisoft":
+                        case "uplay":
+                        case "ubisoft connect":
+                            Description = GetUbisoftData(GameName, PlayniteLanguage, GameId);
                             break;
                     }
                 }
@@ -293,6 +298,42 @@ namespace MetadataLocal
                 }
             }
         }
+
+        public static string GetUbisoftData(string GameName, string PlayniteLanguage, string Id = "")
+        {
+            string Description = string.Empty;
+            string url = @"https://xely3u4lod-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=XELY3U4LOD&x-algolia-api-key=5638539fd9edb8f2c6b024b49ec375bd";
+
+            try
+            {
+                string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
+                string payload = "{\"requests\":[{\"indexName\":\"" + indexName 
+                    + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
+                    + GameName + "\"}]}";
+
+                string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
+                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+
+                var ListData = responseObject.results.First().hits;
+                UbisoftLibrary.GameStoreSearchResponse Data;
+                if (!Id.IsNullOrEmpty() && Id.Length > 5)
+                {
+                    Data = ListData.Find(x => x.id == Id);
+                }
+                else
+                {
+                    Data = ListData.Find(x => Common.NormalizeGameName(x.title.ToLower()) == Common.NormalizeGameName(GameName.ToLower()));
+                }
+
+                Data.html_description.First().TryGetValue(PlayniteLanguage, out Description);
+            }
+            catch(Exception ex)
+            {
+                Common.LogError(ex, "Metadatalocal");
+            }
+
+            return Description;
+        }
         #endregion
 
 
@@ -381,7 +422,7 @@ namespace MetadataLocal
 
                 JObject resultObject = JObject.Parse(result);
                 string stringData = JsonConvert.SerializeObject(resultObject["games"]["game"]);
-                List<GameStoreSearchResponse> listOriginGames = JsonConvert.DeserializeObject<List<GameStoreSearchResponse>>(stringData);
+                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = JsonConvert.DeserializeObject<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
 
                 if (listOriginGames.HasItems())
                 {
@@ -496,6 +537,50 @@ namespace MetadataLocal
             catch (Exception ex)
             {
                 Common.LogError(ex, "MetadataLocal", $"Failed to download data for {searchTerm}");
+            }
+
+            return results;
+        }
+
+        public static List<SearchResult> GetMultiUbisoftData(IPlayniteAPI PlayniteApi, string searchTerm)
+        {
+#if DEBUG
+            logger.Debug($"MetadataLocal - GetMultiUbisoftData({searchTerm})");
+#endif
+
+            var results = new List<SearchResult>();
+            string url = @"https://xely3u4lod-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=XELY3U4LOD&x-algolia-api-key=5638539fd9edb8f2c6b024b49ec375bd";
+
+            try
+            {
+                string PlayniteLanguage = PlayniteApi.ApplicationSettings.Language;
+                string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
+                string payload = "{\"requests\":[{\"indexName\":\"" + indexName
+                    + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
+                    + searchTerm + "\"}]}";
+
+                string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
+                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+
+                var ListData = responseObject.results.First().hits;
+                foreach (var game in ListData)
+                {
+                    string gameName = game.title;
+                    string gameImg = game.additional_image_link;
+                    string gameId = game.id;
+
+                    results.Add(new SearchResult
+                    {
+                        Name = gameName,
+                        ImageUrl = gameImg,
+                        StoreName = "Ubisoft",
+                        StoreId = gameId
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "Metadatalocal");
             }
 
             return results;

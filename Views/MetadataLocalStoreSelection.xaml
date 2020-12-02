@@ -42,11 +42,12 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="0" Name="rbSteam"
-                         Tag="Steam" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0" Checked="Rb_Check">
-                    <DockPanel Width="100" Height="90">
+                         Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
@@ -56,8 +57,8 @@
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbEpic"
-                         Tag="Epic" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0" Checked="Rb_Check">
-                    <DockPanel Width="100" Height="90">
+                         Tag="Epic" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
@@ -67,8 +68,8 @@
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="2" Name="rbOrigin"
-                         Tag="Origin" Click="Button_Click" Width="100" Height="90" Margin="0,0,0,20" Padding="0" Checked="Rb_Check">
-                    <DockPanel Width="100" Height="90">
+                         Tag="Origin" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            Foreground="{Binding ElementName=rbOrigin, Path=Foreground}"
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0" />
@@ -77,14 +78,25 @@
                     </DockPanel>
                 </RadioButton>
 
-                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbXbox"
-                         Tag="Xbox" Click="Button_Click" Width="100" Height="90" Padding="0" Checked="Rb_Check">
-                    <DockPanel Width="100" Height="90">
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="3" Name="rbXbox"
+                         Tag="Xbox" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
 
                         <Label Grid.Row="1" Content="Xbox" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
+                    </DockPanel>
+                </RadioButton>
+
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbUbisoft"
+                         Tag="Ubisoft" Click="Button_Click" Width="100" Height="80" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                           HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                           Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
+
+                        <Label Grid.Row="1" Content="Ubisoft" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
                     </DockPanel>
                 </RadioButton>
             </Grid>
