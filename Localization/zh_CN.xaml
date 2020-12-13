@@ -3,10 +3,10 @@
     
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Store source selection</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Store selection for metadata source</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Enable store selection for localised description</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Enable store selection for metadata source when downloading metadata</sys:String>
 
 </ResourceDictionary>

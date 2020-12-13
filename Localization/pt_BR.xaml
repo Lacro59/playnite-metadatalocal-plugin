@@ -3,10 +3,10 @@
     
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Seleção de fonte de armazenamento</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Seleção de lojas para fonte de metadados</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Habilitar seleção de loja para descrição localizada</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Ativar seleção de loja para fonte de metadados quando baixar metadados</sys:String>
 
 </ResourceDictionary>

@@ -3,10 +3,10 @@
     
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Выбор источника</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Сохранить выбор источника метаданных</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Включить выбор магазина для локализованного описания</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Включить выбор магазина для источника метаданных при загрузке метаданных</sys:String>
 
 </ResourceDictionary>

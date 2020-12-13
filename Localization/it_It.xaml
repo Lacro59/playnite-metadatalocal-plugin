@@ -3,10 +3,10 @@
     
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Selezione della fonte del negozio</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Selezione del negozio per la sorgente dei meta-dati</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Abilita la selezione del negozio per descrizioni tradotte</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Abilita la selezione del negozio per la sorgente dei meta-dati quando li scarichi</sys:String>
 
 </ResourceDictionary>
