@@ -1,11 +1,7 @@
 ﻿using MetadataLocal.Views;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
-using PluginCommon;
-using PluginCommon.PlayniteResources;
-using PluginCommon.PlayniteResources.API;
-using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Converters;
+using CommonPluginsShared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,17 +41,17 @@ namespace MetadataLocal
             string pluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // Add plugin localization in application ressource.
-            PluginCommon.PluginLocalization.SetPluginLanguage(pluginFolder, api.ApplicationSettings.Language);
+            PluginLocalization.SetPluginLanguage(pluginFolder, api.ApplicationSettings.Language);
+
+            // Add common in application ressource.
+            Common.Load(pluginFolder);
+            Common.SetEvent(PlayniteApi);
 
             // Check version
             if (settings.EnableCheckVersion)
             {
                 CheckVersion cv = new CheckVersion();
-
-                if (cv.Check("MetadataLocal", pluginFolder))
-                {
-                    cv.ShowNotification(api, "MetadataLocal - " + resources.GetString("LOCUpdaterWindowTitle"));
-                }
+                cv.Check("MetadataLocal", pluginFolder, api);
             }
         }
 

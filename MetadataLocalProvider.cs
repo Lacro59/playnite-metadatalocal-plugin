@@ -1,11 +1,7 @@
 ﻿using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
-using PluginCommon;
-using PluginCommon.PlayniteResources;
-using PluginCommon.PlayniteResources.API;
-using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Converters;
+using CommonPluginsShared;
 using Newtonsoft.Json;
 using System.Text;
 using System.Net.Http;
@@ -25,10 +21,10 @@ using AngleSharp.Dom.Html;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK.Data;
 using MetadataLocal.EpicLibrary;
-using PluginCommon.PlayniteResources.PluginLibrary.SteamLibrary.SteamShared;
-using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
-using PluginCommon.PlayniteResources.PluginLibrary.XboxLibrary.Models;
 using MetadataLocal.UbisoftLibrary;
+using CommonPluginsPlaynite.PluginLibrary.SteamLibrary.SteamShared;
+using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
+using CommonPluginsPlaynite.PluginLibrary.XboxLibrary.Models;
 
 namespace MetadataLocal
 {

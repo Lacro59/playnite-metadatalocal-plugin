@@ -6,10 +6,6 @@
         mc:Ignorable="d" Height="560" Width="700" 
         Background="{DynamicResource WindowBackgourndBrush}">
 
-    <UserControl.Resources>
-        <FontFamily x:Key="font">pack://application:,,,/PluginCommon;component/Resources/font.ttf#font</FontFamily>
-    </UserControl.Resources>
-
     <Grid>
         <Grid Name="PART_DataLoadWishlist">
             <ProgressBar IsIndeterminate="True" Width="350" Height="40" />
@@ -48,7 +44,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="0" Name="rbSteam"
                          Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
 
@@ -59,7 +55,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbEpic"
                          Tag="Epic" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
 
@@ -70,7 +66,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="2" Name="rbOrigin"
                          Tag="Origin" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
                            Foreground="{Binding ElementName=rbOrigin, Path=Foreground}"
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0" />
 
@@ -81,7 +77,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="3" Name="rbXbox"
                          Tag="Xbox" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
 
@@ -92,7 +88,7 @@
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbUbisoft"
                          Tag="Ubisoft" Click="Button_Click" Width="100" Height="80" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
-                        <Label DockPanel.Dock="Top" Content="" FontFamily="{StaticResource font}" 
+                        <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
                            HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
                            Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
 
