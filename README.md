@@ -1,5 +1,5 @@
 # playnite-metadatalocal-plugin
-Generic plugin for [Playnite](https://playnite.link/) application.
+Generic plugin for [Playnite](https://playnite.link/) application.  
 This plugin get localised game description. 
 
 More information here: https://playnite.link/forum/thread-291.html
