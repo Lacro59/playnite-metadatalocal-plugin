@@ -42,7 +42,7 @@ namespace MetadataLocal
 
         public string _PlayniteConfigurationPath { get; set; }
         public static string PlayniteLanguage { get; set; }
-        
+
 
         private List<MetadataField> availableFields;
         public override List<MetadataField> AvailableFields
@@ -53,7 +53,7 @@ namespace MetadataLocal
                 {
                     availableFields = GetAvailableFields();
                 }
-        
+
                 return availableFields;
             }
         }
@@ -115,7 +115,7 @@ namespace MetadataLocal
                             windowExtension.ShowDialog();
                         }));
 
-                        if(!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
+                        if (!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
                         {
                             GameId = ViewExtension.StoreResult.StoreId;
                             GameName = ViewExtension.StoreResult.Name;
@@ -172,7 +172,7 @@ namespace MetadataLocal
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "MetadataLocal", $"Error with {GameName} - {GameId} - {StoreName}");
+                    Common.LogError(ex, false, $"Error with {GameName} - {GameId} - {StoreName}");
                 }
             }
 
@@ -199,7 +199,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                Common.LogError(ex, false, $"Failed to load {url}");
                 return string.Empty;
             }
         }
@@ -207,16 +207,17 @@ namespace MetadataLocal
         public static string GetOriginData(string gameId, string PlayniteLanguage)
         {
             string url = string.Empty;
-            try { 
-            string OriginLang = CodeLang.GetOriginLang(PlayniteLanguage);
-            string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
-            url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
-            var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
+            try
+            {
+                string OriginLang = CodeLang.GetOriginLang(PlayniteLanguage);
+                string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
+                url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
+                var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to load {url}");
+                Common.LogError(ex, false, $"Failed to load {url}");
                 return string.Empty;
             }
         }
@@ -303,7 +304,7 @@ namespace MetadataLocal
             try
             {
                 string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
-                string payload = "{\"requests\":[{\"indexName\":\"" + indexName 
+                string payload = "{\"requests\":[{\"indexName\":\"" + indexName
                     + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
                     + GameName + "\"}]}";
 
@@ -323,9 +324,9 @@ namespace MetadataLocal
 
                 Data.html_description.First().TryGetValue(PlayniteLanguage, out Description);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Common.LogError(ex, "Metadatalocal");
+                Common.LogError(ex, false);
             }
 
             return Description;
@@ -397,7 +398,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to download {string.Format(searchUrl, searchTerm)}");
+                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
             }
 
             return results;
@@ -447,7 +448,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to download {string.Format(searchUrl, searchTerm)}");
+                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
             }
 
             return results;
@@ -461,7 +462,8 @@ namespace MetadataLocal
 
             var results = new List<SearchResult>();
 
-            try { 
+            try
+            {
                 using (var client = new WebStoreClient())
                 {
                     var catalogs = client.QuerySearch(searchTerm).GetAwaiter().GetResult();
@@ -482,7 +484,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to download data for {searchTerm}");
+                Common.LogError(ex, false, $"Failed to download data for {searchTerm}");
             }
 
             return results;
@@ -532,7 +534,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "MetadataLocal", $"Failed to download data for {searchTerm}");
+                Common.LogError(ex, false, $"Failed to download data for {searchTerm}");
             }
 
             return results;
@@ -576,7 +578,7 @@ namespace MetadataLocal
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "Metadatalocal");
+                Common.LogError(ex, false);
             }
 
             return results;

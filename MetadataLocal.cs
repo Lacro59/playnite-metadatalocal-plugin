@@ -15,7 +15,7 @@ namespace MetadataLocal
         private static readonly ILogger logger = LogManager.GetLogger();
         private static IResourceProvider resources = new ResourceProvider();
 
-        private MetadataLocalSettings settings { get; set; }
+        private MetadataLocalSettings PluginSettings { get; set; }
 
         public override Guid Id { get; } = Guid.Parse("ffb390b2-758f-40ac-9b20-9be08fd05a65");
 
@@ -33,36 +33,26 @@ namespace MetadataLocal
 
         public MetadataLocal(IPlayniteAPI api) : base(api)
         {
-            settings = new MetadataLocalSettings(this);
+            PluginSettings = new MetadataLocalSettings(this);
             PlayniteConfigurationPath = api.Paths.ConfigurationPath;
 
 
             // Get plugin's location 
-            string pluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            // Add plugin localization in application ressource.
-            PluginLocalization.SetPluginLanguage(pluginFolder, api.ApplicationSettings.Language);
-
-            // Add common in application ressource.
-            Common.Load(pluginFolder);
+            // Set the common resourses & event
+            Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
             Common.SetEvent(PlayniteApi);
-
-            // Check version
-            if (settings.EnableCheckVersion)
-            {
-                CheckVersion cv = new CheckVersion();
-                cv.Check("MetadataLocal", pluginFolder, api);
-            }
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
         {
-            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, settings);
+            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, PluginSettings);
         }
 
         public override ISettings GetSettings(bool firstRunSettings)
         {
-            return settings;
+            return PluginSettings;
         }
 
         public override UserControl GetSettingsView(bool firstRunSettings)
