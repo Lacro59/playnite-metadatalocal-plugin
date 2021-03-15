@@ -169,9 +169,7 @@ namespace MetadataLocal.Views
                         PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
                         PART_GridData.IsEnabled = true;
 
-#if DEBUG
-                        logger.Debug($"MetadataLocal - SearchElements({gameSearch}) - " + JsonConvert.SerializeObject(antecedent.Result));
-#endif
+                        Common.LogDebug(true, $"SearchElements({gameSearch}) - " + JsonConvert.SerializeObject(antecedent.Result));
                     }));
                 });
         }

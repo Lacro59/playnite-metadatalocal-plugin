@@ -100,7 +100,7 @@ namespace MetadataLocal
                     }
                     else
                     {
-                        logger.Warn("MetadataLocal - No source name");
+                        logger.Warn("No source name");
                     }
 
 
@@ -154,7 +154,7 @@ namespace MetadataLocal
                             }
                             else
                             {
-                                logger.Warn("MetadataLocal - XboxLibrary is used then disabled");
+                                logger.Warn("XboxLibrary is used then disabled");
                                 _plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
                                     $"metadataLocal-xbox-disabled",
                                     "XboxLibrary is used then disabled",
@@ -278,7 +278,7 @@ namespace MetadataLocal
 
                 if (response.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    logger.Warn("Metadatalocal - Xbox user is not connected");
+                    logger.Warn("Xbox user is not connected");
                     plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
                         $"metadalocal-xbox-error",
                         "Xbox - " + resources.GetString("LOCNotLoggedIn"),
@@ -338,9 +338,7 @@ namespace MetadataLocal
         // From UniversalSteamMetadata
         public static List<SearchResult> GetMultiSteamData(string searchTerm)
         {
-#if DEBUG
-            logger.Debug($"MetadataLocal - GetMultiSteamData({searchTerm})");
-#endif
+            Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
 
             var results = new List<SearchResult>();
             string searchUrl = string.Empty;
@@ -406,9 +404,7 @@ namespace MetadataLocal
 
         public static List<SearchResult> GetMultiOriginData(string searchTerm, string PluginUserDataPath)
         {
-#if DEBUG
-            logger.Debug($"MetadataLocal - GetMultiOriginData({searchTerm})");
-#endif
+            Common.LogDebug(true, $"GetMultiOriginData({searchTerm})");
 
             string searchUrl = @"https://api1.origin.com/xsearch/store/fr_fr/fra/products?searchTerm={0}&start=0&rows=20&isGDP=true";
             var results = new List<SearchResult>();
@@ -430,9 +426,9 @@ namespace MetadataLocal
 
                         OriginApi originApi = new OriginApi(PluginUserDataPath);
                         string gameId = originApi.GetOriginId(title);
-#if DEBUG
-                        logger.Debug($"MetadataLocal - Find for {title} - {gameId}");
-#endif
+
+                        Common.LogDebug(true, $"Find for {title} - {gameId}");
+
                         if (!gameId.IsNullOrEmpty())
                         {
                             results.Add(new SearchResult
@@ -456,9 +452,7 @@ namespace MetadataLocal
 
         public static List<SearchResult> GetMultiEpicData(string searchTerm)
         {
-#if DEBUG
-            logger.Debug($"MetadataLocal - GetMultiEpicData({searchTerm})");
-#endif
+            Common.LogDebug(true, $"GetMultiEpicData({searchTerm})");
 
             var results = new List<SearchResult>();
 
@@ -492,9 +486,7 @@ namespace MetadataLocal
 
         public static List<SearchResult> GetMultiXboxData(IPlayniteAPI PlayniteApi, string searchTerm)
         {
-#if DEBUG
-            logger.Debug($"MetadataLocal - GetMultiXboxData({searchTerm})");
-#endif
+            Common.LogDebug(true, $"GetMultiXboxData({searchTerm})");
 
             string searchUrl = @"https://www.microsoft.com/fr-fr/search/shop/games?q={0}";
             var results = new List<SearchResult>();
@@ -542,9 +534,7 @@ namespace MetadataLocal
 
         public static List<SearchResult> GetMultiUbisoftData(IPlayniteAPI PlayniteApi, string searchTerm)
         {
-#if DEBUG
-            logger.Debug($"MetadataLocal - GetMultiUbisoftData({searchTerm})");
-#endif
+            Common.LogDebug(true, $"GetMultiUbisoftData({searchTerm})");
 
             var results = new List<SearchResult>();
             string url = @"https://xely3u4lod-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=XELY3U4LOD&x-algolia-api-key=5638539fd9edb8f2c6b024b49ec375bd";
