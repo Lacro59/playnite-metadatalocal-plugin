@@ -15,7 +15,7 @@ namespace MetadataLocal
         private static readonly ILogger logger = LogManager.GetLogger();
         private static IResourceProvider resources = new ResourceProvider();
 
-        private MetadataLocalSettings PluginSettings { get; set; }
+        private MetadataLocalSettingsViewModel PluginSettings { get; set; }
 
         public override Guid Id { get; } = Guid.Parse("ffb390b2-758f-40ac-9b20-9be08fd05a65");
 
@@ -33,7 +33,7 @@ namespace MetadataLocal
 
         public MetadataLocal(IPlayniteAPI api) : base(api)
         {
-            PluginSettings = new MetadataLocalSettings(this);
+            PluginSettings = new MetadataLocalSettingsViewModel(this);
             PlayniteConfigurationPath = api.Paths.ConfigurationPath;
 
 
@@ -47,7 +47,7 @@ namespace MetadataLocal
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)
         {
-            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, PluginSettings);
+            return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, PluginSettings.Settings);
         }
 
         public override ISettings GetSettings(bool firstRunSettings)
