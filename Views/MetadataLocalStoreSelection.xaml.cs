@@ -26,6 +26,7 @@ namespace MetadataLocal.Views
 
         public bool IsFirstLoad = true;
 
+
         public MetadataLocalStoreSelection(IPlayniteAPI PlayniteApi, string StoreDefault, string GameName, string PluginUserDataPath)
         {
             _PlayniteApi = PlayniteApi;
@@ -71,6 +72,7 @@ namespace MetadataLocal.Views
             IsFirstLoad = false;
         }
 
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             lbSelectable.ItemsSource = null;
@@ -99,7 +101,7 @@ namespace MetadataLocal.Views
         {
             SearchElements();
         }
-
+        
         private void Rb_Check(object sender, RoutedEventArgs e)
         {
             if (!IsFirstLoad)
