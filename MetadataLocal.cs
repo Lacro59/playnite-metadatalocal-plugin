@@ -21,15 +21,15 @@ namespace MetadataLocal
 
         public string PlayniteConfigurationPath { get; set; }
 
-
+        // Include addition fields if supported by the metadata source
         public override List<MetadataField> SupportedFields { get; } = new List<MetadataField>
         {
             MetadataField.Description
-            // Include addition fields if supported by the metadata source
         };
 
         // Change to something more appropriate
         public override string Name => "MetadataLocal";
+
 
         public MetadataLocal(IPlayniteAPI api) : base(api)
         {
@@ -50,6 +50,8 @@ namespace MetadataLocal
             return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, PluginSettings.Settings);
         }
 
+
+        #region Settings
         public override ISettings GetSettings(bool firstRunSettings)
         {
             return PluginSettings;
@@ -59,5 +61,6 @@ namespace MetadataLocal
         {
             return new MetadataLocalSettingsView();
         }
+        #endregion
     }
 }

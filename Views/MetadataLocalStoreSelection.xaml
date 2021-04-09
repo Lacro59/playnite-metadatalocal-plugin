@@ -1,11 +1,10 @@
 ﻿<UserControl x:Class="MetadataLocal.Views.MetadataLocalStoreSelection"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
-             mc:Ignorable="d" Height="560" Width="700" 
-        Background="{DynamicResource WindowBackgourndBrush}">
+             mc:Ignorable="d" Height="560" Width="700" >
 
     <Grid>
         <Grid Name="PART_DataLoadWishlist">
@@ -43,22 +42,22 @@
                 </Grid.RowDefinitions>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="0" Name="rbSteam"
-                         Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                             Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
-                           HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
-                           Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
+                               HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                               Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
 
                         <Label Grid.Row="1" Content="Steam" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
                     </DockPanel>
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbEpic"
-                         Tag="Epic" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                             Tag="Epic" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
-                           HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
-                           Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
+                               HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                               Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
 
                         <Label Grid.Row="1" Content="Epic Game" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbEpic, Path=Foreground}" />
                     </DockPanel>
@@ -76,11 +75,11 @@
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="3" Name="rbXbox"
-                         Tag="Xbox" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                             Tag="Xbox" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
-                           HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
-                           Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
+                               HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                               Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
 
                         <Label Grid.Row="1" Content="Xbox" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbXbox, Path=Foreground}" />
                     </DockPanel>
@@ -101,7 +100,7 @@
             <!--Game selection-->
             <Grid Grid.Column="2" Grid.Row="0" Name="PART_GridListSearch">
                 <ListBox Name="lbSelectable" SelectionChanged="LbSelectable_SelectionChanged" Height="{Binding ElementName=PART_GridListSearch, Path=ActualHeight}"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid Margin="0,5">
