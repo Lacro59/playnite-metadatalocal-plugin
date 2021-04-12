@@ -33,15 +33,17 @@ namespace MetadataLocal
         private static readonly ILogger logger = LogManager.GetLogger();
         private static IResourceProvider resources = new ResourceProvider();
 
-        private MetadataLocalSettings _settings;
+        private MetadataLocalSettings Settings;
 
-        private readonly MetadataRequestOptions _options;
-        private readonly MetadataLocal _plugin;
+        private readonly MetadataRequestOptions Options;
+        private readonly MetadataLocal Plugin;
 
         private HttpClient httpClient = new HttpClient();
 
-        public string _PlayniteConfigurationPath { get; set; }
+        public string PlayniteConfigurationPath { get; set; }
         public static string PlayniteLanguage { get; set; }
+
+        private string ForceStoreName = string.Empty;
 
 
         private List<MetadataField> availableFields;
@@ -67,10 +69,10 @@ namespace MetadataLocal
 
         public MetadataLocalProvider(MetadataRequestOptions options, MetadataLocal plugin, string PlayniteConfigurationPath, MetadataLocalSettings settings)
         {
-            _options = options;
-            _plugin = plugin;
-            _PlayniteConfigurationPath = PlayniteConfigurationPath;
-            _settings = settings;
+            Options = options;
+            Plugin = plugin;
+            this.PlayniteConfigurationPath = PlayniteConfigurationPath;
+            Settings = settings;
         }
 
         // Override additional methods based on supported metadata fields.
@@ -80,109 +82,156 @@ namespace MetadataLocal
             string Data;
             string Description = string.Empty;
 
-            if (AvailableFields.Contains(MetadataField.Description))
+            try
             {
-                // Get Playnite language
-                PlayniteLanguage = _plugin.PlayniteApi.ApplicationSettings.Language;
-
-                string GameId = string.Empty;
-                string GameName = string.Empty;
-                string StoreName = string.Empty;
-
-                try
+                if (AvailableFields.Contains(MetadataField.Description))
                 {
-                    GameId = _options.GameData.GameId;
-                    GameName = _options.GameData.Name;
+                    // Get Playnite language
+                    PlayniteLanguage = Plugin.PlayniteApi.ApplicationSettings.Language;
 
-                    if (_options.GameData.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
-                    {
-                        StoreName = _options.GameData.Source.Name;
-                    }
-                    else
-                    {
-                        logger.Warn("No source name");
-                    }
+                    string GameId = string.Empty;
+                    string GameName = string.Empty;
+                    string StoreName = string.Empty;
 
-
-                    // Selectable Store metadata
-                    if (!_options.IsBackgroundDownload && _settings.EnableSelectStore)
+                    try
                     {
-                        MetadataLocalStoreSelection ViewExtension = null;
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        GameId = Options.GameData.GameId;
+                        GameName = Options.GameData.Name;
+
+                        if (Options.GameData.SourceId != default(Guid))
                         {
-                            ViewExtension = new MetadataLocalStoreSelection(_plugin.PlayniteApi, StoreName, GameName, _plugin.GetPluginUserDataPath());
-                            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(_plugin.PlayniteApi, resources.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
-                            windowExtension.ShowDialog();
-                        }));
-
-                        if (!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
-                        {
-                            GameId = ViewExtension.StoreResult.StoreId;
-                            GameName = ViewExtension.StoreResult.Name;
-                            StoreName = ViewExtension.StoreResult.StoreName;
+                            StoreName = Options.GameData.Source.Name;
                         }
                         else
                         {
-                            GameId = string.Empty;
-                            GameName = string.Empty;
-                            StoreName = string.Empty;
-                        }
-                    }
-
-
-                    switch (StoreName.ToLower())
-                    {
-                        case "steam":
-                            uint appId = uint.Parse(GameId);
-                            Data = GetSteamData(appId, PlayniteLanguage);
-                            var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
-                            Description = parsedData[appId.ToString()].data.detailed_description;
-                            break;
-
-                        case "origin":
-                            Description = GetOriginData(GameId, PlayniteLanguage);
-                            break;
-
-                        case "epic":
-                            Description = GetEpicData(GameName);
-                            break;
-
-                        case "xbox":
-                            if (!PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary", _PlayniteConfigurationPath))
+                            if (ForceStoreName.IsNullOrEmpty())
                             {
-                                Description = GetXboxData(GameId, PlayniteLanguage, _plugin.GetPluginUserDataPath(), _plugin).GetAwaiter().GetResult();
+                                logger.Warn("No source name");
                             }
                             else
                             {
-                                logger.Warn("XboxLibrary is used then disabled");
-                                _plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
-                                    $"metadataLocal-xbox-disabled",
-                                    "XboxLibrary is used then disabled",
-                                    NotificationType.Error,
-                                    () => _plugin.OpenSettingsView()
-                                ));
+                                StoreName = ForceStoreName;
                             }
-                            break;
-                        case "ubisoft":
-                        case "uplay":
-                        case "ubisoft connect":
-                            Description = GetUbisoftData(GameName, PlayniteLanguage, GameId);
-                            break;
+                        }
+
+
+                        // Selectable Store metadata
+                        if (!Options.IsBackgroundDownload && Settings.EnableSelectStore)
+                        {
+                            MetadataLocalStoreSelection ViewExtension = null;
+                            Application.Current.Dispatcher.Invoke(new Action(() =>
+                            {
+                                ViewExtension = new MetadataLocalStoreSelection(Plugin.PlayniteApi, StoreName, GameName, Plugin.GetPluginUserDataPath());
+                                Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(Plugin.PlayniteApi, resources.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
+                                windowExtension.ShowDialog();
+                            }));
+
+                            if (!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
+                            {
+                                GameId = ViewExtension.StoreResult.StoreId;
+                                GameName = ViewExtension.StoreResult.Name;
+                                StoreName = ViewExtension.StoreResult.StoreName;
+                            }
+                            else
+                            {
+                                GameId = string.Empty;
+                                GameName = string.Empty;
+                                StoreName = string.Empty;
+                            }
+                        }
+
+
+                        switch (StoreName.ToLower())
+                        {
+                            case "steam":
+                                uint appId = 0;
+                                if (!ForceStoreName.IsNullOrEmpty())
+                                {
+                                    appId = (uint)new SteamApi(Plugin.GetPluginUserDataPath()).GetSteamId(GameName);
+                                }
+                                else
+                                {
+                                    appId = uint.Parse(GameId);
+                                }
+                                
+                                Data = GetSteamData(appId, PlayniteLanguage);
+                                var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
+                                Description = parsedData[appId.ToString()].data.detailed_description;
+                                break;
+
+                            case "origin":
+                                Description = GetOriginData(GameId, PlayniteLanguage);
+                                break;
+
+                            case "epic":
+                                Description = GetEpicData(GameName);
+                                break;
+
+                            case "xbox":
+                                if (!PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary", PlayniteConfigurationPath))
+                                {
+                                    Description = GetXboxData(GameId, PlayniteLanguage, Plugin.GetPluginUserDataPath(), Plugin).GetAwaiter().GetResult();
+                                }
+                                else
+                                {
+                                    logger.Warn("XboxLibrary is used then disabled");
+                                    Plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
+                                        $"metadataLocal-xbox-disabled",
+                                        "XboxLibrary is used then disabled",
+                                        NotificationType.Error,
+                                        () => Plugin.OpenSettingsView()
+                                    ));
+                                }
+                                break;
+
+                            case "ubisoft":
+                            case "uplay":
+                            case "ubisoft connect":
+                                Description = GetUbisoftData(GameName, PlayniteLanguage, GameId);
+                                break;
+
+                            case "gog":
+                                break;
+
+                            default:
+                                if (ForceStoreName.IsNullOrEmpty() && !(!Options.IsBackgroundDownload && Settings.EnableSelectStore))
+                                {
+                                    Common.LogDebug(true, "Used many stores");
+
+                                    foreach (Store store in Settings.Stores)
+                                    {
+                                        ForceStoreName = store.Name;
+                                        Description = GetDescription();
+
+                                        if (!Description.IsNullOrEmpty())
+                                        {
+                                            Common.LogDebug(true, $"find with {ForceStoreName} for {GameName}");
+                                            return Description;
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Error with {GameName} - {GameId} - {StoreName}");
                     }
                 }
-                catch (Exception ex)
+
+                if (Description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty())
                 {
-                    Common.LogError(ex, false, $"Error with {GameName} - {GameId} - {StoreName}");
+                    return base.GetDescription();
+                }
+                else
+                {
+                    return Description;
                 }
             }
-
-            if (Description.IsNullOrEmpty())
+            catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return base.GetDescription();
-            }
-            else
-            {
-                return Description;
             }
         }
 
