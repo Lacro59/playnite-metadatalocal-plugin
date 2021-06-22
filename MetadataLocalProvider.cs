@@ -25,6 +25,7 @@ using MetadataLocal.UbisoftLibrary;
 using CommonPluginsPlaynite.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
 using CommonPluginsPlaynite.PluginLibrary.XboxLibrary.Models;
+using CommonPluginsStores;
 
 namespace MetadataLocal
 {
@@ -147,7 +148,7 @@ namespace MetadataLocal
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
-                                    appId = (uint)new SteamApi(Plugin.GetPluginUserDataPath()).GetSteamId(GameName);
+                                    appId = (uint)new SteamApi().GetSteamId(GameName);
                                 }
                                 else
                                 {
@@ -168,7 +169,7 @@ namespace MetadataLocal
                                 break;
 
                             case "xbox":
-                                if (!PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary", PlayniteConfigurationPath))
+                                if (!CommonPluginsShared.PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary"))
                                 {
                                     Description = GetXboxData(GameId, PlayniteLanguage, Plugin.GetPluginUserDataPath(), Plugin).GetAwaiter().GetResult();
                                 }
@@ -368,7 +369,7 @@ namespace MetadataLocal
                 }
                 else
                 {
-                    Data = ListData.Find(x => Common.NormalizeGameName(x.title.ToLower()) == Common.NormalizeGameName(GameName.ToLower()));
+                    Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.ToLower()));
                 }
 
                 Data.html_description.First().TryGetValue(PlayniteLanguage, out Description);
