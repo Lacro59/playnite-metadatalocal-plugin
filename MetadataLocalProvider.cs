@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using CommonPluginsShared;
-using Newtonsoft.Json;
 using System.Text;
 using System.Net.Http;
 using System.Linq;
@@ -18,7 +17,6 @@ using AngleSharp.Parser.Html;
 using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
-using Newtonsoft.Json.Linq;
 using Playnite.SDK.Data;
 using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
@@ -156,7 +154,7 @@ namespace MetadataLocal
                                 }
                                 
                                 Data = GetSteamData(appId, PlayniteLanguage);
-                                var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
+                                var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
                                 Description = parsedData[appId.ToString()].data.detailed_description;
                                 break;
 
@@ -263,7 +261,7 @@ namespace MetadataLocal
                 string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
                 url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
                 var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
+                return Serialization.FromJson<GameStoreDataResponse>(stringData).i18n.longDescription;
             }
             catch (Exception ex)
             {
@@ -359,7 +357,7 @@ namespace MetadataLocal
                     + GameName + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
                 var ListData = responseObject.results.First().hits;
                 UbisoftLibrary.GameStoreSearchResponse Data;
@@ -401,7 +399,7 @@ namespace MetadataLocal
                     {
                         searchUrl = @"https://store.steampowered.com/api/appdetails?appids={0}";
                         var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, appId));
-                        var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
+                        var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
                         var response = parsedData[appId.ToString()];
 
                         results.Add(new SearchResult
@@ -463,9 +461,9 @@ namespace MetadataLocal
             {
                 string result = Web.DownloadStringDataWithGz(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
 
-                JObject resultObject = JObject.Parse(result);
-                string stringData = JsonConvert.SerializeObject(resultObject["games"]["game"]);
-                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = JsonConvert.DeserializeObject<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
+                dynamic resultObject = Serialization.FromJson<dynamic>(result);
+                string stringData = Serialization.ToJson(resultObject["games"]["game"]);
+                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = Serialization.FromJson<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
 
                 if (listOriginGames.HasItems())
                 {
@@ -598,7 +596,7 @@ namespace MetadataLocal
                     + searchTerm + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
                 var ListData = responseObject.results.First().hits;
                 foreach (var game in ListData)

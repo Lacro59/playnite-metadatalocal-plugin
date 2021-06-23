@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
+using Playnite.SDK.Data;
 using CommonPluginsShared;
 using MetadataLocal.Models;
 using System;
@@ -169,7 +169,7 @@ namespace MetadataLocal.Views
                         PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
                         PART_GridData.IsEnabled = true;
 
-                        Common.LogDebug(true, $"SearchElements({gameSearch}) - " + JsonConvert.SerializeObject(antecedent.Result));
+                        Common.LogDebug(true, $"SearchElements({gameSearch}) - " + Serialization.ToJson(antecedent.Result));
                     }));
                 });
         }
