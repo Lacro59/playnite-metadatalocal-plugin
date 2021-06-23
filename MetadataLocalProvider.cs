@@ -155,7 +155,7 @@ namespace MetadataLocal
                                 
                                 Data = GetSteamData(appId, PlayniteLanguage);
                                 var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
-                                Description = parsedData[appId.ToString()].data.detailed_description;
+                                Description = parsedData[appId.ToString()]?.data?.detailed_description;
                                 break;
 
                             case "origin":
@@ -354,7 +354,7 @@ namespace MetadataLocal
                 string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
                 string payload = "{\"requests\":[{\"indexName\":\"" + indexName
                     + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
-                    + GameName + "\"}]}";
+                    + GameName.Replace("&", string.Empty).Replace("-", string.Empty).Replace(":", string.Empty) + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
                 var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
@@ -368,9 +368,18 @@ namespace MetadataLocal
                 else
                 {
                     Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.ToLower()));
+
+                    if (Data == null && ListData.Count == 1)
+                    {
+                        Data = ListData.First();
+                    }
+                    else
+                    {
+                        Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.Replace("&", "and").ToLower()));
+                    }
                 }
 
-                Data.html_description.First().TryGetValue(PlayniteLanguage, out Description);
+                Data?.html_description?.First().TryGetValue(PlayniteLanguage, out Description);
             }
             catch (Exception ex)
             {
