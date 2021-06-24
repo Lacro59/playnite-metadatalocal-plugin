@@ -91,6 +91,7 @@ namespace MetadataLocal
                     string GameId = string.Empty;
                     string GameName = string.Empty;
                     string StoreName = string.Empty;
+                    string StoreUrl = string.Empty;
 
                     try
                     {
@@ -130,12 +131,14 @@ namespace MetadataLocal
                                 GameId = ViewExtension.StoreResult.StoreId;
                                 GameName = ViewExtension.StoreResult.Name;
                                 StoreName = ViewExtension.StoreResult.StoreName;
+                                StoreUrl = ViewExtension.StoreResult.StoreUrl;
                             }
                             else
                             {
                                 GameId = string.Empty;
                                 GameName = string.Empty;
                                 StoreName = string.Empty;
+                                StoreUrl = string.Empty;
                             }
                         }
 
@@ -167,20 +170,7 @@ namespace MetadataLocal
                                 break;
 
                             case "xbox":
-                                if (!CommonPluginsShared.PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary"))
-                                {
-                                    Description = GetXboxData(GameId, PlayniteLanguage, Plugin.GetPluginUserDataPath(), Plugin).GetAwaiter().GetResult();
-                                }
-                                else
-                                {
-                                    logger.Warn("XboxLibrary is used then disabled");
-                                    Plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
-                                        $"metadataLocal-xbox-disabled",
-                                        "XboxLibrary is used then disabled",
-                                        NotificationType.Error,
-                                        () => Plugin.OpenSettingsView()
-                                    ));
-                                }
+                                Description = GetXboxData(Plugin, StoreUrl);
                                 break;
 
                             case "ubisoft":
@@ -278,7 +268,14 @@ namespace MetadataLocal
                 var catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
                 if (catalogs.HasItems())
                 {
-                    var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
+                    //TODO Wait fix in Playnite9
+                    var catalog = catalogs.FirstOrDefault(a => a.title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
+                    if (catalog == null)
+                    {
+                        catalog = catalogs[0];
+                    }
+
+                    var product = client.GetProductInfo(catalog.productSlug, PlayniteLanguage).GetAwaiter().GetResult();
                     if (product.pages.HasItems())
                     {
                         var page = product.pages.FirstOrDefault(a => a.type is string type && type == "productHome");
@@ -304,44 +301,28 @@ namespace MetadataLocal
         }
 
         // Override Xbox function GetTitleInfo in WebApiClient on XboxLibrary.
-        public static async Task<string> GetXboxData(string pfn, string PlayniteLanguage, string PluginUserDataPath, MetadataLocal plugin)
+        public static string GetXboxData(MetadataLocal plugin, string Url)
         {
-            var xstsLoginTokesPath = Path.Combine(PluginUserDataPath + "\\..\\7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287", "xsts.json");
-            var tokens = Playnite.SDK.Data.Serialization.FromJsonFile<AuthorizationData>(xstsLoginTokesPath);
-            using (var client = new HttpClient())
+            string Description = string.Empty;
+            string WebResponse = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+
+            if (!WebResponse.IsNullOrEmpty())
             {
-                client.DefaultRequestHeaders.Add("x-xbl-contract-version", "2");
-                client.DefaultRequestHeaders.Add("Authorization", $"XBL3.0 x={tokens.DisplayClaims.xui[0].uhs};{tokens.Token}");
-                client.DefaultRequestHeaders.Add("Accept-Language", CodeLang.GetEpicLang(PlayniteLanguage));
+                HtmlParser parser = new HtmlParser();
+                IHtmlDocument htmlDocument = parser.Parse(WebResponse);
 
-                var requestData = new Dictionary<string, List<string>>
+                Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
+                if (Description.IsNullOrEmpty())
                 {
-                    { "pfns", new List<string> { pfn } },
-                    { "windowsPhoneProductIds", new List<string>() },
-                };
-
-                var response = await client.PostAsync(
-                           @"https://titlehub.xboxlive.com/titles/batch/decoration/detail",
-                           new StringContent(Playnite.SDK.Data.Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
-
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    logger.Warn("Xbox user is not connected");
-                    plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
-                        $"metadalocal-xbox-error",
-                        "Xbox - " + resources.GetString("LOCNotLoggedIn"),
-                        NotificationType.Error
-                    ));
-
-                    return string.Empty;
+                    Description = string.Empty;
                 }
                 else
                 {
-                    var cont = await response.Content.ReadAsStringAsync();
-                    var titleHistory = Playnite.SDK.Data.Serialization.FromJson<TitleHistoryResponse>(cont);
-                    return titleHistory.titles.First().detail.description;
+                    Description = Description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
                 }
             }
+
+            return Description;
         }
 
         public static string GetUbisoftData(string GameName, string PlayniteLanguage, string Id = "")
@@ -545,7 +526,7 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiXboxData({searchTerm})");
 
-            string searchUrl = @"https://www.microsoft.com/fr-fr/search/shop/games?q={0}";
+            string searchUrl = "https://www.microsoft.com/" + CodeLang.GetEpicLang(PlayniteLanguage) + "/search/shop/games?q={0}";
             var results = new List<SearchResult>();
 
             try
@@ -565,16 +546,18 @@ namespace MetadataLocal
                         break;
                     }
 
-                    string gameName = gameElem.QuerySelector("h3.c-subheading-6").InnerHtml.Trim();
-                    string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img").GetAttribute("src");
-                    string gamePfns = gameElem.QuerySelector("a").GetAttribute("data-pfns");
+                    string gameName = gameElem.QuerySelector("h3.c-subheading-6")?.InnerHtml?.Trim();
+                    string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img")?.GetAttribute("src");
+                    string gamePfns = gameElem.QuerySelector("a")?.GetAttribute("data-pfns");
+                    string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
 
                     results.Add(new SearchResult
                     {
-                        Name = gameName,
+                        Name = WebUtility.HtmlDecode(gameName),
                         ImageUrl = gameImg,
                         StoreName = "Xbox",
-                        StoreId = gamePfns
+                        StoreId = gamePfns,
+                        StoreUrl = StoreUrl
                     });
 
                     i++;
