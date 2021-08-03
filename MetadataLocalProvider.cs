@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using CommonPluginsShared;
-using Newtonsoft.Json;
 using System.Text;
 using System.Net.Http;
 using System.Linq;
@@ -18,7 +17,6 @@ using AngleSharp.Parser.Html;
 using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
-using Newtonsoft.Json.Linq;
 using Playnite.SDK.Data;
 using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
@@ -93,6 +91,7 @@ namespace MetadataLocal
                     string GameId = string.Empty;
                     string GameName = string.Empty;
                     string StoreName = string.Empty;
+                    string StoreUrl = string.Empty;
 
                     try
                     {
@@ -132,12 +131,14 @@ namespace MetadataLocal
                                 GameId = ViewExtension.StoreResult.StoreId;
                                 GameName = ViewExtension.StoreResult.Name;
                                 StoreName = ViewExtension.StoreResult.StoreName;
+                                StoreUrl = ViewExtension.StoreResult.StoreUrl;
                             }
                             else
                             {
                                 GameId = string.Empty;
                                 GameName = string.Empty;
                                 StoreName = string.Empty;
+                                StoreUrl = string.Empty;
                             }
                         }
 
@@ -156,7 +157,7 @@ namespace MetadataLocal
                                 }
                                 
                                 Data = GetSteamData(appId, PlayniteLanguage);
-                                var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
+                                var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
                                 Description = parsedData[appId.ToString()]?.data?.detailed_description;
                                 break;
 
@@ -169,20 +170,7 @@ namespace MetadataLocal
                                 break;
 
                             case "xbox":
-                                if (!CommonPluginsShared.PlayniteTools.IsDisabledPlaynitePlugins("XboxLibrary"))
-                                {
-                                    Description = GetXboxData(GameId, PlayniteLanguage, Plugin.GetPluginUserDataPath(), Plugin).GetAwaiter().GetResult();
-                                }
-                                else
-                                {
-                                    logger.Warn("XboxLibrary is used then disabled");
-                                    Plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
-                                        $"metadataLocal-xbox-disabled",
-                                        "XboxLibrary is used then disabled",
-                                        NotificationType.Error,
-                                        () => Plugin.OpenSettingsView()
-                                    ));
-                                }
+                                Description = GetXboxData(Plugin, StoreUrl);
                                 break;
 
                             case "ubisoft":
@@ -263,7 +251,7 @@ namespace MetadataLocal
                 string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
                 url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
                 var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData).i18n.longDescription;
+                return Serialization.FromJson<GameStoreDataResponse>(stringData).i18n.longDescription;
             }
             catch (Exception ex)
             {
@@ -280,7 +268,14 @@ namespace MetadataLocal
                 var catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
                 if (catalogs.HasItems())
                 {
-                    var product = client.GetProductInfo(catalogs[0].productSlug, PlayniteLanguage).GetAwaiter().GetResult();
+                    //TODO Wait fix in Playnite9
+                    var catalog = catalogs.FirstOrDefault(a => a.title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
+                    if (catalog == null)
+                    {
+                        catalog = catalogs[0];
+                    }
+
+                    var product = client.GetProductInfo(catalog.productSlug, PlayniteLanguage).GetAwaiter().GetResult();
                     if (product.pages.HasItems())
                     {
                         var page = product.pages.FirstOrDefault(a => a.type is string type && type == "productHome");
@@ -306,44 +301,28 @@ namespace MetadataLocal
         }
 
         // Override Xbox function GetTitleInfo in WebApiClient on XboxLibrary.
-        public static async Task<string> GetXboxData(string pfn, string PlayniteLanguage, string PluginUserDataPath, MetadataLocal plugin)
+        public static string GetXboxData(MetadataLocal plugin, string Url)
         {
-            var xstsLoginTokesPath = Path.Combine(PluginUserDataPath + "\\..\\7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287", "xsts.json");
-            var tokens = Playnite.SDK.Data.Serialization.FromJsonFile<AuthorizationData>(xstsLoginTokesPath);
-            using (var client = new HttpClient())
+            string Description = string.Empty;
+            string WebResponse = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+
+            if (!WebResponse.IsNullOrEmpty())
             {
-                client.DefaultRequestHeaders.Add("x-xbl-contract-version", "2");
-                client.DefaultRequestHeaders.Add("Authorization", $"XBL3.0 x={tokens.DisplayClaims.xui[0].uhs};{tokens.Token}");
-                client.DefaultRequestHeaders.Add("Accept-Language", CodeLang.GetEpicLang(PlayniteLanguage));
+                HtmlParser parser = new HtmlParser();
+                IHtmlDocument htmlDocument = parser.Parse(WebResponse);
 
-                var requestData = new Dictionary<string, List<string>>
+                Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
+                if (Description.IsNullOrEmpty())
                 {
-                    { "pfns", new List<string> { pfn } },
-                    { "windowsPhoneProductIds", new List<string>() },
-                };
-
-                var response = await client.PostAsync(
-                           @"https://titlehub.xboxlive.com/titles/batch/decoration/detail",
-                           new StringContent(Playnite.SDK.Data.Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
-
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    logger.Warn("Xbox user is not connected");
-                    plugin.PlayniteApi.Notifications.Add(new NotificationMessage(
-                        $"metadalocal-xbox-error",
-                        "Xbox - " + resources.GetString("LOCNotLoggedIn"),
-                        NotificationType.Error
-                    ));
-
-                    return string.Empty;
+                    Description = string.Empty;
                 }
                 else
                 {
-                    var cont = await response.Content.ReadAsStringAsync();
-                    var titleHistory = Playnite.SDK.Data.Serialization.FromJson<TitleHistoryResponse>(cont);
-                    return titleHistory.titles.First().detail.description;
+                    Description = Description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
                 }
             }
+
+            return Description;
         }
 
         public static string GetUbisoftData(string GameName, string PlayniteLanguage, string Id = "")
@@ -356,10 +335,10 @@ namespace MetadataLocal
                 string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
                 string payload = "{\"requests\":[{\"indexName\":\"" + indexName
                     + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
-                    + GameName + "\"}]}";
+                    + GameName.Replace("&", string.Empty).Replace("-", string.Empty).Replace(":", string.Empty) + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
                 var ListData = responseObject.results.First().hits;
                 UbisoftLibrary.GameStoreSearchResponse Data;
@@ -370,9 +349,18 @@ namespace MetadataLocal
                 else
                 {
                     Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.ToLower()));
+
+                    if (Data == null && ListData.Count == 1)
+                    {
+                        Data = ListData.First();
+                    }
+                    else
+                    {
+                        Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.Replace("&", "and").ToLower()));
+                    }
                 }
 
-                Data.html_description.First().TryGetValue(PlayniteLanguage, out Description);
+                Data?.html_description?.First().TryGetValue(PlayniteLanguage, out Description);
             }
             catch (Exception ex)
             {
@@ -401,7 +389,7 @@ namespace MetadataLocal
                     {
                         searchUrl = @"https://store.steampowered.com/api/appdetails?appids={0}";
                         var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, appId));
-                        var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
+                        var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
                         var response = parsedData[appId.ToString()];
 
                         results.Add(new SearchResult
@@ -463,9 +451,9 @@ namespace MetadataLocal
             {
                 string result = Web.DownloadStringDataWithGz(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
 
-                JObject resultObject = JObject.Parse(result);
-                string stringData = JsonConvert.SerializeObject(resultObject["games"]["game"]);
-                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = JsonConvert.DeserializeObject<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
+                dynamic resultObject = Serialization.FromJson<dynamic>(result);
+                string stringData = Serialization.ToJson(resultObject["games"]["game"]);
+                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = Serialization.FromJson<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
 
                 if (listOriginGames.HasItems())
                 {
@@ -538,7 +526,7 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiXboxData({searchTerm})");
 
-            string searchUrl = @"https://www.microsoft.com/fr-fr/search/shop/games?q={0}";
+            string searchUrl = "https://www.microsoft.com/" + CodeLang.GetEpicLang(PlayniteLanguage) + "/search/shop/games?q={0}";
             var results = new List<SearchResult>();
 
             try
@@ -558,16 +546,18 @@ namespace MetadataLocal
                         break;
                     }
 
-                    string gameName = gameElem.QuerySelector("h3.c-subheading-6").InnerHtml.Trim();
-                    string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img").GetAttribute("src");
-                    string gamePfns = gameElem.QuerySelector("a").GetAttribute("data-pfns");
+                    string gameName = gameElem.QuerySelector("h3.c-subheading-6")?.InnerHtml?.Trim();
+                    string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img")?.GetAttribute("src");
+                    string gamePfns = gameElem.QuerySelector("a")?.GetAttribute("data-pfns");
+                    string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
 
                     results.Add(new SearchResult
                     {
-                        Name = gameName,
+                        Name = WebUtility.HtmlDecode(gameName),
                         ImageUrl = gameImg,
                         StoreName = "Xbox",
-                        StoreId = gamePfns
+                        StoreId = gamePfns,
+                        StoreUrl = StoreUrl
                     });
 
                     i++;
@@ -598,7 +588,7 @@ namespace MetadataLocal
                     + searchTerm + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = JsonConvert.DeserializeObject<UbisoftSearchResponse>(response);
+                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
                 var ListData = responseObject.results.First().hits;
                 foreach (var game in ListData)
