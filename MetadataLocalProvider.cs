@@ -157,7 +157,7 @@ namespace MetadataLocal
                                 
                                 Data = GetSteamData(appId, PlayniteLanguage);
                                 var parsedData = JsonConvert.DeserializeObject<Dictionary<string, StoreAppDetailsResult>>(Data);
-                                Description = parsedData[appId.ToString()].data.detailed_description;
+                                Description = parsedData[appId.ToString()]?.data?.detailed_description;
                                 break;
 
                             case "origin":
