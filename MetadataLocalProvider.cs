@@ -527,42 +527,79 @@ namespace MetadataLocal
             Common.LogDebug(true, $"GetMultiXboxData({searchTerm})");
 
             string searchUrl = "https://www.microsoft.com/" + CodeLang.GetEpicLang(PlayniteLanguage) + "/search/shop/games?q={0}";
+            string suggestUrl = "https://www.microsoft.com/services/api/v3/suggest?market=" + CodeLang.GetEpicLang(PlayniteLanguage) 
+                + "&clientId=7F27B536-CF6B-4C65-8638-A0F8CBDFCA65&sources=Iris-Products%2CDCatAll-Products%2CMicrosoft-Terms&filter=%2BClientType%3AStoreWeb&counts=1%2C5%2C5&query={0}";
             var results = new List<SearchResult>();
+
 
             try
             {
-                IWebView webView = PlayniteApi.WebViews.CreateOffscreenView();
-                webView.NavigateAndWait(string.Format(searchUrl, searchTerm));
-                string str = webView.GetPageSource();
+                string str = Web.DownloadStringDataJson(string.Format(suggestUrl, WebUtility.UrlEncode(searchTerm))).GetAwaiter().GetResult();
+                MicrosoftSuggestResult microsoftSuggestResult = Serialization.FromJson<MicrosoftSuggestResult>(str);
 
-                HtmlParser parser = new HtmlParser();
-                IHtmlDocument htmlDocument = parser.Parse(str);
-
-                int i = 0;
-                foreach (var gameElem in htmlDocument.QuerySelectorAll("div.m-channel-placement-item"))
+                foreach (var suggest in microsoftSuggestResult?.ResultSets?[0].Suggests)
                 {
-                    if (i == 10)
-                    {
-                        break;
-                    }
-
-                    string gameName = gameElem.QuerySelector("h3.c-subheading-6")?.InnerHtml?.Trim();
-                    string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img")?.GetAttribute("src");
-                    string gamePfns = gameElem.QuerySelector("a")?.GetAttribute("data-pfns");
-                    string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
+                    string gameName = suggest.Title;
+                    string gameImg = "https:" + suggest.ImageUrl;
+                    string gamePfns = string.Empty;
+                    string StoreUrl = "https:" + suggest.Url;
 
                     results.Add(new SearchResult
                     {
-                        Name = WebUtility.HtmlDecode(gameName),
+                        Name = gameName,
                         ImageUrl = gameImg,
                         StoreName = "Xbox",
                         StoreId = gamePfns,
                         StoreUrl = StoreUrl
                     });
-
-                    i++;
                 }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Failed to download data for {searchTerm}");
+            }
 
+
+            try
+            {
+                using (IWebView webView = PlayniteApi.WebViews.CreateOffscreenView())
+                {
+                    webView.NavigateAndWait(string.Format(searchUrl, WebUtility.UrlEncode(searchTerm)));
+                    string str = webView.GetPageSource();
+
+                    HtmlParser parser = new HtmlParser();
+                    IHtmlDocument htmlDocument = parser.Parse(str);
+
+                    int i = 0;
+                    foreach (var gameElem in htmlDocument.QuerySelectorAll("div.m-channel-placement-item"))
+                    {
+                        if (i == 10)
+                        {
+                            break;
+                        }
+
+                        string gameName = gameElem.QuerySelector("h3.c-subheading-6")?.InnerHtml?.Trim();
+                        string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img")?.GetAttribute("src");
+                        string gamePfns = gameElem.QuerySelector("a")?.GetAttribute("data-pfns");
+                        string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
+
+
+                        var el = results.Where(x => x.Name == WebUtility.HtmlDecode(gameName)).FirstOrDefault();
+                        if (el == null)
+                        {
+                            results.Add(new SearchResult
+                            {
+                                Name = WebUtility.HtmlDecode(gameName),
+                                ImageUrl = gameImg,
+                                StoreName = "Xbox",
+                                StoreId = gamePfns,
+                                StoreUrl = StoreUrl
+                            });
+
+                            i++;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

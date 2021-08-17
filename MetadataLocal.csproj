@@ -85,6 +85,7 @@
     <Compile Include="MetadataLocal.cs" />
     <Compile Include="MetadataLocalProvider.cs" />
     <Compile Include="MetadataLocalSettings.cs" />
+    <Compile Include="Models\MicrosoftSuggestResult.cs" />
     <Compile Include="Models\Store.cs" />
     <Compile Include="playnite-plugincommon\CommonPluginsControls\PlayniteControls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
