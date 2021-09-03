@@ -75,7 +75,7 @@ namespace MetadataLocal
         }
 
         // Override additional methods based on supported metadata fields.
-        public override string GetDescription()
+        public override string GetDescription(GetMetadataFieldArgs args)
         {
             // Get type source, data and description
             string Data;
@@ -190,7 +190,7 @@ namespace MetadataLocal
                                     foreach (Store store in Settings.Stores)
                                     {
                                         ForceStoreName = store.Name;
-                                        Description = GetDescription();
+                                        Description = GetDescription(args);
 
                                         if (!Description.IsNullOrEmpty())
                                         {
@@ -210,7 +210,7 @@ namespace MetadataLocal
 
                 if (Description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty())
                 {
-                    return base.GetDescription();
+                    return base.GetDescription(args);
                 }
                 else
                 {
@@ -220,7 +220,7 @@ namespace MetadataLocal
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
-                return base.GetDescription();
+                return base.GetDescription(args);
             }
         }
 
