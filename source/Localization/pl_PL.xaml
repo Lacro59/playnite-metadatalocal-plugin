@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    
+
     <!-- MetadataLocalStoreSelection -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelection">Wybór źródła metadanych</sys:String>
@@ -8,5 +8,6 @@
     <!-- MetadataLocalSettingsView -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelect">Włącz wybór sklepu źródła metadanych przy pobieraniu metadanych</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
 
 </ResourceDictionary>
