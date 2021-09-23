@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using MetadataLocal.Models;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace MetadataLocal
     {
         #region Settings variables
         public bool EnableSelectStore { get; set; } = false;
+
+        public List<Store> Stores { get; set; } = new List<Store>();
         #endregion
 
         // Playnite serializes settings object to a JSON object and saves it as text file.
@@ -55,6 +58,15 @@ namespace MetadataLocal
             else
             {
                 Settings = new MetadataLocalSettings();
+            }
+
+            if (Settings.Stores.Count == 0)
+            {
+                Settings.Stores.Add(new Store { Name = "Steam" });
+                Settings.Stores.Add(new Store { Name = "Epic" });
+                Settings.Stores.Add(new Store { Name = "Origin" });
+                Settings.Stores.Add(new Store { Name = "Xbox" });
+                Settings.Stores.Add(new Store { Name = "Ubisoft" });
             }
         }
 

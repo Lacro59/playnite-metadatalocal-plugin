@@ -3,11 +3,15 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <FontFamily x:Key="FontIcoFont">pack://application:,,,/CommonPluginsResources;component/ResourcesPlaynite/icofont.ttf#icofont</FontFamily>
+                </ResourceDictionary>
                 <!--Playnite Resources-->
                 <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/Constants.xaml" />
                 <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/Common.xaml" />
                 <!--Playnite Default localization-->
                 <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/LocSource.xaml" />
+                <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/ExtensionsLocSource.xaml" />
                 <!--Default Controls-->
                 <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/DefaultControls/Border.xaml" />
                 <ResourceDictionary Source="playnite-plugincommon/CommonPluginsResources/ResourcesPlaynite/DefaultControls/TextBlock.xaml" />

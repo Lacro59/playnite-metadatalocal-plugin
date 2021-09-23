@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\Dropbox\Playnite\PlayniteCurrent\Extensions\playnite-metadatalocal-plugin\</OutputPath>
+    <OutputPath>..\..\..\Playnite_dev\Extensions\playnite-metadatalocal-plugin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,22 +32,27 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug9|AnyCPU'">
     <OutputPath>..\..\..\Dropbox\Playnite\Playnite9\Extensions\playnite-metadatalocal-plugin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AngleSharp, Version=0.9.9.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
       <HintPath>packages\AngleSharp.0.9.9\lib\net45\AngleSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Playnite.SDK">
-      <HintPath>..\..\..\Dropbox\Playnite\Playnite9\Playnite.SDK.dll</HintPath>
+    <Reference Include="Playnite.SDK, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\PlayniteSDK.6.0.0-preview3\lib\net462\Playnite.SDK.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamKit2, Version=1.8.3.0, Culture=neutral, PublicKeyToken=ed3ce47ed5aad940, processorArchitecture=MSIL">
+      <HintPath>packages\SteamKit2.1.8.3\lib\net45\SteamKit2.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -76,6 +81,8 @@
     <Compile Include="MetadataLocal.cs" />
     <Compile Include="MetadataLocalProvider.cs" />
     <Compile Include="MetadataLocalSettings.cs" />
+    <Compile Include="Models\MicrosoftSuggestResult.cs" />
+    <Compile Include="Models\Store.cs" />
     <Compile Include="playnite-plugincommon\CommonPluginsControls\PlayniteControls\SearchBox.xaml.cs">
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
@@ -239,5 +246,6 @@
   </ItemGroup>
   <Import Project="playnite-plugincommon\CommonPlayniteShared\CommonPlayniteShared.projitems" Label="Shared" />
   <Import Project="playnite-plugincommon\CommonPluginsShared\CommonPluginsShared.projitems" Label="Shared" />
+  <Import Project="playnite-plugincommon\CommonPluginsStores\CommonPluginsStores.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -6,5 +6,6 @@
         public string ImageUrl { get; set; }
         public string StoreName { get; set; }
         public string StoreId { get; set; }
+        public string StoreUrl { get; set; }
     }
 }
