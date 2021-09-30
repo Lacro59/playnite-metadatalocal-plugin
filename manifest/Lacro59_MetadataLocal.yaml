@@ -1,0 +1,9 @@
+AddonId: playnite-metadatalocal-plugin
+Packages:
+  - Version: 2.0
+    RequiredApiVersion: 6.0.0
+    ReleaseDate: 2021-09-30
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v2.0/playnite-metadatalocal-plugin_2_0.pext
+    Changelog:
+      - Playnite 9 version (not compatible with Playnite 8)
+      - Fixed many bugs
