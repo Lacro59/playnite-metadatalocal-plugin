@@ -8,6 +8,6 @@
     <!-- MetadataLocalSettingsView -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelect">Ativar seleção de loja para fonte de metadados quando baixar metadados</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Ordem de pesquisa por jogos para lojas não suportadas</sys:String>
 
 </ResourceDictionary>
