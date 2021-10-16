@@ -421,13 +421,16 @@ namespace MetadataLocal
                             }
                             var gameId = gameElem.GetAttribute("data-ds-appid");
 
-                            results.Add(new SearchResult
+                            if (!gameId.IsNullOrEmpty())
                             {
-                                Name = HttpUtility.HtmlDecode(title),
-                                ImageUrl = img,
-                                StoreName = "Steam",
-                                StoreId = gameId
-                            });
+                                results.Add(new SearchResult
+                                {
+                                    Name = HttpUtility.HtmlDecode(title),
+                                    ImageUrl = img,
+                                    StoreName = "Steam",
+                                    StoreId = gameId
+                                });
+                            }
                         }
                     }
                 }
