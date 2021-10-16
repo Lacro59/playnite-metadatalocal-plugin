@@ -86,11 +86,11 @@
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbUbisoft"
-                         Tag="Ubisoft" Click="Button_Click" Width="100" Height="80" Padding="0" Checked="Rb_Check">
+                             Tag="Ubisoft" Click="Button_Click" Width="100" Height="80" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
-                           HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
-                           Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
+                               HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                               Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
 
                         <Label Grid.Row="1" Content="Ubisoft" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbUbisoft, Path=Foreground}" />
                     </DockPanel>
