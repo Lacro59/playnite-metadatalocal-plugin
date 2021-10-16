@@ -1,4 +1,4 @@
-﻿using CommonPluginsPlaynite.PluginLibrary.EpicLibrary.Models;
+﻿using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using System;
 using System.Collections.Generic;
 

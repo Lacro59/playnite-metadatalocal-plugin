@@ -20,9 +20,9 @@ using AngleSharp.Dom.Html;
 using Playnite.SDK.Data;
 using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
-using CommonPluginsPlaynite.PluginLibrary.SteamLibrary.SteamShared;
-using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
-using CommonPluginsPlaynite.PluginLibrary.XboxLibrary.Models;
+using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
+using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
+using CommonPlayniteShared.PluginLibrary.XboxLibrary.Models;
 using CommonPluginsStores;
 
 namespace MetadataLocal

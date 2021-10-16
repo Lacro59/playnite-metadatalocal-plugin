@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using CommonPluginsPlaynite.PluginLibrary.EpicLibrary.Models;
+using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 
 namespace MetadataLocal.EpicLibrary
 {
