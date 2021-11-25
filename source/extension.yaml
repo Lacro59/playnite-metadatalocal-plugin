@@ -1,7 +1,7 @@
 ﻿Id: playnite-metadatalocal-plugin
 Name: Metadata Local
 Author: Lacro59
-Version: 2.0.1
+Version: 2.0.2
 Module: MetadataLocal.dll
 Type: MetadataProvider
 Icon: icon.png
