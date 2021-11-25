@@ -5,11 +5,8 @@ using CommonPluginsShared;
 using System.Text;
 using System.Net.Http;
 using System.Linq;
-using MetadataLocal.OriginLibrary;
 using Playnite.SDK;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.IO;
 using MetadataLocal.Views;
 using System.Windows;
 using System.Net;
@@ -22,7 +19,6 @@ using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
-using CommonPlayniteShared.PluginLibrary.XboxLibrary.Models;
 using CommonPluginsStores;
 
 namespace MetadataLocal
@@ -268,7 +264,6 @@ namespace MetadataLocal
                 var catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
                 if (catalogs.HasItems())
                 {
-                    //TODO Wait fix in Playnite9
                     var catalog = catalogs.FirstOrDefault(a => a.title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
                     if (catalog == null)
                     {
