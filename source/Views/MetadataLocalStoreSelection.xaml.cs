@@ -42,6 +42,10 @@ namespace MetadataLocal.Views
                     rbSteam.IsChecked = true;
                     break;
 
+                case "gog":
+                    rbGog.IsChecked = true;
+                    break;
+
                 case "origin":
                     rbOrigin.IsChecked = true;
                     break;
@@ -111,6 +115,11 @@ namespace MetadataLocal.Views
                     SearchElements();
                 }
 
+                if (rb.Name == "rbGog" && (bool)rb.IsChecked)
+                {
+                    SearchElements();
+                }
+
                 if (rb.Name == "rbEpic" && (bool)rb.IsChecked)
                 {
                     SearchElements();
@@ -145,6 +154,7 @@ namespace MetadataLocal.Views
         private void SearchElements()
         {
             bool IsSteam = (bool)rbSteam.IsChecked;
+            bool IsGog = (bool)rbGog.IsChecked;
             bool IsOrigin = (bool)rbOrigin.IsChecked;
             bool IsEpic = (bool)rbEpic.IsChecked;
             bool IsXbox = (bool)rbXbox.IsChecked;
@@ -156,7 +166,7 @@ namespace MetadataLocal.Views
             string gameSearch = RemoveAccents(SearchElement.Text);
 
             lbSelectable.ItemsSource = null;
-            Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft))
+            Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft, IsGog))
                 .ContinueWith(antecedent =>
                 {
                     this.Dispatcher.Invoke(new Action(() => {
@@ -185,13 +195,18 @@ namespace MetadataLocal.Views
             return sbReturn.ToString();
         }
 
-        private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft)
+        private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft, bool IsGog)
         {
             var results = new List<SearchResult>();
 
             if (IsSteam)
             {
                 results = MetadataLocalProvider.GetMultiSteamData(SearchElement);
+            }
+
+            if (IsGog)
+            {
+                results = MetadataLocalProvider.GetMultiSGogData(SearchElement);
             }
 
             if (IsOrigin)

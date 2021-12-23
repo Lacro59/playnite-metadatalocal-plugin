@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
-             mc:Ignorable="d" Height="560" Width="700" >
+             mc:Ignorable="d" Height="660" Width="700" >
 
     <Grid>
         <Grid Name="PART_DataLoadWishlist">
@@ -39,6 +39,7 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="0" Name="rbSteam"
@@ -52,7 +53,18 @@
                     </DockPanel>
                 </RadioButton>
 
-                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbEpic"
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbGog"
+                             Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                    <DockPanel Width="100" Height="80">
+                        <Label DockPanel.Dock="Top" Content="&#xea35;" FontFamily="{DynamicResource CommonFont}" 
+                               HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
+                               Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
+
+                        <Label Grid.Row="1" Content="Steam" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
+                    </DockPanel>
+                </RadioButton>
+
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="2" Name="rbEpic"
                              Tag="Epic" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
@@ -63,7 +75,7 @@
                     </DockPanel>
                 </RadioButton>
 
-                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="2" Name="rbOrigin"
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="3" Name="rbOrigin"
                          Tag="Origin" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
@@ -74,7 +86,7 @@
                     </DockPanel>
                 </RadioButton>
 
-                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="3" Name="rbXbox"
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbXbox"
                              Tag="Xbox" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 
@@ -85,7 +97,7 @@
                     </DockPanel>
                 </RadioButton>
 
-                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="4" Name="rbUbisoft"
+                <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="5" Name="rbUbisoft"
                              Tag="Ubisoft" Click="Button_Click" Width="100" Height="80" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="" FontFamily="{DynamicResource CommonFont}" 

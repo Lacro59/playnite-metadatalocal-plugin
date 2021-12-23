@@ -19,6 +19,7 @@ using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPluginsStores;
+using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 
 namespace MetadataLocal
 {
@@ -153,6 +154,12 @@ namespace MetadataLocal
                                 var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
                                 Description = parsedData[appId.ToString()]?.data?.detailed_description;
                                 break;
+                        
+                            case "gog":
+                                Data = GetGogData(GameId, PlayniteLanguage);
+                                var gogParsedData = Serialization.FromJson<ProductApiDetail>(Data);
+                                Description = gogParsedData?.description?.full;
+                                break;
 
                             case "origin":
                                 Description = GetOriginData(GameId, PlayniteLanguage);
@@ -170,9 +177,6 @@ namespace MetadataLocal
                             case "uplay":
                             case "ubisoft connect":
                                 Description = GetUbisoftData(GameName, PlayniteLanguage, GameId);
-                                break;
-
-                            case "gog":
                                 break;
 
                             default:
@@ -360,6 +364,24 @@ namespace MetadataLocal
             }
 
             return Description;
+        }
+
+        public static string GetGogData(string gameId, string PlayniteLanguage)
+        {
+            string url = @"http://api.gog.com/products/{0}?expand=description";
+            string UrlGogLang = @"https://www.gog.com/user/changeLanguage/{0}";
+
+            try
+            {
+                string GogLangCode = CodeLang.GetGogLang(PlayniteLanguage);
+                string UrlLang = string.Format(UrlGogLang, GogLangCode.ToLower());
+                return Web.DownloadStringDataWithUrlBefore(string.Format(url, gameId), UrlLang).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Failed to load {url}");
+                return string.Empty;
+            }
         }
         #endregion
 
@@ -641,6 +663,39 @@ namespace MetadataLocal
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
+            }
+
+            return results;
+        }
+
+        public static List<SearchResult> GetMultiSGogData(string searchTerm)
+        {
+            Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
+
+            var results = new List<SearchResult>();
+            string searchUrl = "https://www.gog.com/games/ajax/filtered?limit=20&search={0}";
+            searchUrl = string.Format(searchUrl, WebUtility.UrlEncode(searchTerm));
+
+            try
+            {
+                string searchData = Web.DownloadStringData(searchUrl).GetAwaiter().GetResult();
+                GogSearchResult gogSearchResult = Serialization.FromJson<GogSearchResult>(searchData);
+
+                foreach (var el in gogSearchResult?.products)
+                {
+                    results.Add(new SearchResult
+                    {
+                        Name = el.title,
+                        ImageUrl = "https:" + el.image + "_200.jpg",
+                        StoreId = el.id.ToString(),
+                        StoreName = "GOG",
+                        StoreUrl = "https://www.gog.com/" + el.url
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
             }
 
             return results;
