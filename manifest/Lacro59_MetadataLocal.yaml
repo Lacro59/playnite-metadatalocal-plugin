@@ -19,3 +19,10 @@ Packages:
     PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v2.0.2/playnite-metadatalocal-plugin_2_0_2.pext
     Changelog:
       - Updated localizations
+  - Version: 2.1
+    RequiredApiVersion: 6.2.0
+    ReleaseDate: 2021-12-23
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v2.1/playnite-metadatalocal-plugin_2_1.pext
+    Changelog:
+      - Added GOG store
+      - Updated localizations
