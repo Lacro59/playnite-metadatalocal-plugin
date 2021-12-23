@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using CommonPluginsShared;
 using System.Text;
-using System.Net.Http;
 using System.Linq;
 using Playnite.SDK;
 using System.Text.RegularExpressions;
@@ -32,8 +31,6 @@ namespace MetadataLocal
 
         private readonly MetadataRequestOptions Options;
         private readonly MetadataLocal Plugin;
-
-        private HttpClient httpClient = new HttpClient();
 
         public string PlayniteConfigurationPath { get; set; }
         public static string PlayniteLanguage { get; set; }
