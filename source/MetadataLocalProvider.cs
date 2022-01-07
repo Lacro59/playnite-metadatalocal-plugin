@@ -152,7 +152,7 @@ namespace MetadataLocal
                                 
                                 Data = GetSteamData(appId, PlayniteLanguage);
                                 var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
-                                Description = parsedData[appId.ToString()]?.data?.detailed_description;
+                                Description = parsedData[appId.ToString()]?.data?.about_the_game;
                                 break;
                         
                             case "gog":
