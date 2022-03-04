@@ -54,13 +54,13 @@
                 </RadioButton>
 
                 <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Grid.Column="0" Grid.Row="1" Name="rbGog"
-                             Tag="Steam" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
+                             Tag="GOG" Click="Button_Click" Width="100" Height="80" Margin="0,0,0,15" Padding="0" Checked="Rb_Check">
                     <DockPanel Width="100" Height="80">
                         <Label DockPanel.Dock="Top" Content="&#xea35;" FontFamily="{DynamicResource CommonFont}" 
                                HorizontalAlignment="Center" FontSize="48" Margin="0,5,0,0"
-                               Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
+                               Foreground="{Binding ElementName=rbGog, Path=Foreground}" />
 
-                        <Label Grid.Row="1" Content="Steam" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbSteam, Path=Foreground}" />
+                        <Label Grid.Row="1" Content="GOG" HorizontalAlignment="Center" Foreground="{Binding ElementName=rbGog, Path=Foreground}" />
                     </DockPanel>
                 </RadioButton>
 

@@ -109,36 +109,7 @@ namespace MetadataLocal.Views
         {
             if (!IsFirstLoad)
             {
-                RadioButton rb = sender as RadioButton;
-                if (rb.Name == "rbSteam" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
-
-                if (rb.Name == "rbGog" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
-
-                if (rb.Name == "rbEpic" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
-
-                if (rb.Name == "rbOrigin" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
-
-                if (rb.Name == "rbXbox" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
-
-                if (rb.Name == "rbUbisoft" && (bool)rb.IsChecked)
-                {
-                    SearchElements();
-                }
+                SearchElements();
             }
         }
 
@@ -163,7 +134,7 @@ namespace MetadataLocal.Views
             PART_DataLoadWishlist.Visibility = Visibility.Visible;
             PART_GridData.IsEnabled = false;
 
-            string gameSearch = RemoveAccents(SearchElement.Text);
+            string gameSearch = PlayniteTools.NormalizeGameName(SearchElement.Text);
 
             lbSelectable.ItemsSource = null;
             Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft, IsGog))
@@ -181,18 +152,6 @@ namespace MetadataLocal.Views
                         Common.LogDebug(true, $"SearchElements({gameSearch}) - " + Serialization.ToJson(antecedent.Result));
                     }));
                 });
-        }
-
-        private string RemoveAccents(string text)
-        {
-            StringBuilder sbReturn = new StringBuilder();
-            var arrayText = text.Normalize(NormalizationForm.FormD).ToCharArray();
-            foreach (char letter in arrayText)
-            {
-                if (CharUnicodeInfo.GetUnicodeCategory(letter) != UnicodeCategory.NonSpacingMark)
-                    sbReturn.Append(letter);
-            }
-            return sbReturn.ToString();
         }
 
         private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft, bool IsGog)
