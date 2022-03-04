@@ -183,7 +183,6 @@ namespace MetadataLocal
                                 if (ForceStoreName.IsNullOrEmpty() && !(!Options.IsBackgroundDownload && Settings.EnableSelectStore))
                                 {
                                     Common.LogDebug(true, "Used many stores");
-
                                     foreach (Store store in Settings.Stores)
                                     {
                                         ForceStoreName = store.Name;
@@ -191,7 +190,7 @@ namespace MetadataLocal
 
                                         if (!Description.IsNullOrEmpty())
                                         {
-                                            Common.LogDebug(true, $"find with {ForceStoreName} for {GameName}");
+                                            Common.LogDebug(true, $"Find with {ForceStoreName} for {GameName}");
                                             return Description;
                                         }
                                     }

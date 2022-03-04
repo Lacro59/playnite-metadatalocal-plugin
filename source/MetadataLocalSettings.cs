@@ -1,4 +1,5 @@
-﻿using MetadataLocal.Models;
+﻿using CommonPluginsShared.Extensions;
+using MetadataLocal.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System.Collections.Generic;
@@ -63,6 +64,11 @@ namespace MetadataLocal
                 Settings.Stores.Add(new Store { Name = "Origin" });
                 Settings.Stores.Add(new Store { Name = "Xbox" });
                 Settings.Stores.Add(new Store { Name = "Ubisoft" });
+                Settings.Stores.Add(new Store { Name = "GOG" });
+            }
+            else if (Settings.Stores.Find(x => x.Name.IsEqual("GOG")) == null)
+            {
+                Settings.Stores.Add(new Store { Name = "GOG" });
             }
         }
 
