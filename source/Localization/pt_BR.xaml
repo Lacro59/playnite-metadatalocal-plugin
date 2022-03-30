@@ -3,11 +3,11 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Seleção de lojas para fonte de metadados</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Store selection for metadata source</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Ativar seleção de loja para fonte de metadados quando baixar metadados</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">Ordem de pesquisa por jogos para lojas não suportadas</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Habilitar seleção da loja para a fonte de metadados quando baixar os metadados</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Pesquisar ordem por jogos para lojas não suportadas</sys:String>
 
 </ResourceDictionary>
