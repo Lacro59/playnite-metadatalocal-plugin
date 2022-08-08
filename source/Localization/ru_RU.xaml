@@ -3,11 +3,11 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Сохранить выбор источника метаданны</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Сохранить выбор источника метаданных</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Включить выбор магазина для источника метаданных при загрузке метаданны</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Включить выбор магазина для источника метаданных при загрузке метаданных</sys:String>
     <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
 
 </ResourceDictionary>
