@@ -28,15 +28,7 @@ namespace MetadataLocal
         private MetadataLocalSettings EditingClone { get; set; }
 
         private MetadataLocalSettings _Settings;
-        public MetadataLocalSettings Settings
-        {
-            get => _Settings;
-            set
-            {
-                _Settings = value;
-                OnPropertyChanged();
-            }
-        }
+        public MetadataLocalSettings Settings { get => _Settings; set => SetValue(ref _Settings, value); }
 
 
         public MetadataLocalSettingsViewModel(MetadataLocal plugin)
@@ -45,17 +37,10 @@ namespace MetadataLocal
             Plugin = plugin;
 
             // Load saved settings.
-            var savedSettings = plugin.LoadPluginSettings<MetadataLocalSettings>();
+            MetadataLocalSettings savedSettings = plugin.LoadPluginSettings<MetadataLocalSettings>();
 
             // LoadPluginSettings returns null if not saved data is available.
-            if (savedSettings != null)
-            {
-                Settings = savedSettings;
-            }
-            else
-            {
-                Settings = new MetadataLocalSettings();
-            }
+            Settings = savedSettings != null ? savedSettings : new MetadataLocalSettings();
 
             if (Settings.Stores.Count == 0)
             {
@@ -64,10 +49,6 @@ namespace MetadataLocal
                 Settings.Stores.Add(new Store { Name = "Origin" });
                 Settings.Stores.Add(new Store { Name = "Xbox" });
                 Settings.Stores.Add(new Store { Name = "Ubisoft" });
-                Settings.Stores.Add(new Store { Name = "GOG" });
-            }
-            else if (Settings.Stores.Find(x => x.Name.IsEqual("GOG")) == null)
-            {
                 Settings.Stores.Add(new Store { Name = "GOG" });
             }
         }

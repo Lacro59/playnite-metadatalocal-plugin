@@ -12,9 +12,6 @@ namespace MetadataLocal
 {
     public class MetadataLocal : MetadataPlugin
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
-
         private MetadataLocalSettingsViewModel PluginSettings { get; set; }
 
         public override Guid Id { get; } = Guid.Parse("ffb390b2-758f-40ac-9b20-9be08fd05a65");
