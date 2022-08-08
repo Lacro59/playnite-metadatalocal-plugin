@@ -18,8 +18,9 @@ using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
-using CommonPluginsStores;
 using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
+using CommonPluginsStores.Steam;
+using CommonPluginsStores.Origin;
 
 namespace MetadataLocal
 {
@@ -84,7 +85,7 @@ namespace MetadataLocal
 
                     string GameId = string.Empty;
                     string GameName = string.Empty;
-                    string StoreName = string.Empty;
+                    string StoreName = ForceStoreName;
                     string StoreUrl = string.Empty;
 
                     try
@@ -94,7 +95,10 @@ namespace MetadataLocal
 
                         if (Options.GameData.SourceId != default(Guid))
                         {
-                            StoreName = Options.GameData.Source.Name;
+                            if (StoreName.IsNullOrEmpty())
+                            {
+                                StoreName = Options.GameData.Source.Name;
+                            }
                         }
                         else
                         {
@@ -143,7 +147,7 @@ namespace MetadataLocal
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
-                                    appId = (uint)new SteamApi().GetSteamId(GameName);
+                                    appId = (uint)new SteamApi("MetadataLocal").GetAppId(GameName);
                                 }
                                 else
                                 {
