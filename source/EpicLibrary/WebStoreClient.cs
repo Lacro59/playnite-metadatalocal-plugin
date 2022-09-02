@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
+using System.Net;
+using CommonPluginsShared.Extensions;
 
 namespace MetadataLocal.EpicLibrary
 {
@@ -40,15 +42,32 @@ namespace MetadataLocal.EpicLibrary
 
         public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug, string PlayniteLanguage)
         {
-            string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
-            if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
+            if (!productSlug.IsNullOrEmpty())
             {
-                EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);
+                string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
+                if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
+                {
+                    EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);
+                }
+
+                string slugUri = productSlug.Split('/').First();
+                string productUrl = string.Format(ProductUrlBase, slugUri, EpicLangCountry);
+                string str = string.Empty;
+
+                try
+                {
+                    str = await httpClient.GetStringAsync(productUrl);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, ex.Message.Contains("404"));
+                    return null;
+                }
+
+                Serialization.TryFromJson(str, out WebStoreModels.ProductResponse parsedData);
+                return parsedData;
             }
-            var slugUri = productSlug.Split('/').First();
-            var productUrl = string.Format(ProductUrlBase, slugUri, EpicLangCountry);
-            var str = await httpClient.GetStringAsync(productUrl);
-            return Playnite.SDK.Data.Serialization.FromJson<WebStoreModels.ProductResponse>(str);
+            return null;
         }
     }
 }

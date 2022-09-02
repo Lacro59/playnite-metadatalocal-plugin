@@ -151,18 +151,37 @@ namespace MetadataLocal
                                 }
                                 else
                                 {
-                                    appId = uint.Parse(GameId);
+                                    uint.TryParse(GameId, out appId);
                                 }
-                                
-                                Data = GetSteamData(appId, PlayniteLanguage);
-                                var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(Data);
-                                Description = parsedData[appId.ToString()]?.data?.about_the_game;
+
+                                if (appId != 0)
+                                {
+                                    Data = GetSteamData(appId, PlayniteLanguage);
+                                    Serialization.TryFromJson(Data, out Dictionary<string, StoreAppDetailsResult> parsedData);
+
+                                    if (parsedData != null)
+                                    {
+                                        Description = parsedData[appId.ToString()]?.data?.about_the_game;
+                                    }
+                                    else
+                                    {
+                                        Common.LogDebug(true, $"No Steam data find for {GameName} with {appId}");
+                                    }
+                                }
                                 break;
                         
                             case "gog":
                                 Data = GetGogData(GameId, PlayniteLanguage);
-                                var gogParsedData = Serialization.FromJson<ProductApiDetail>(Data);
-                                Description = gogParsedData?.description?.full;
+                                Serialization.TryFromJson(Data, out ProductApiDetail gogParsedData);
+                                
+                                if (gogParsedData != null)
+                                {
+                                    Description = gogParsedData.description?.full;
+                                }
+                                else
+                                {
+                                    Common.LogDebug(true, $"No GOG data find for {GameName} with {GameId}");
+                                }
                                 break;
 
                             case "origin":
@@ -174,7 +193,7 @@ namespace MetadataLocal
                                 break;
 
                             case "xbox":
-                                Description = GetXboxData(Plugin, StoreUrl);
+                                Description = GetXboxData(StoreUrl);
                                 break;
 
                             case "ubisoft":
@@ -251,7 +270,17 @@ namespace MetadataLocal
                 string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
                 url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
                 var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                return Serialization.FromJson<GameStoreDataResponse>(stringData).i18n.longDescription;
+
+                Serialization.TryFromJson(stringData, out GameStoreDataResponse parsedData);
+                if (parsedData?.i18n?.longDescription != null)
+                {
+                    return parsedData.i18n.longDescription;
+                }
+                else
+                {
+                    Common.LogDebug(true, $"No Origin data find with {gameId}");
+                    return string.Empty;
+                }
             }
             catch (Exception ex)
             {
@@ -266,7 +295,7 @@ namespace MetadataLocal
             {
                 string Description = string.Empty;
                 var catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
-                if (catalogs.HasItems())
+                if (catalogs?.HasItems() ?? false)
                 {
                     var catalog = catalogs.FirstOrDefault(a => a.title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
                     if (catalog == null)
@@ -275,7 +304,7 @@ namespace MetadataLocal
                     }
 
                     var product = client.GetProductInfo(catalog.productSlug, PlayniteLanguage).GetAwaiter().GetResult();
-                    if (product.pages.HasItems())
+                    if (product?.pages?.HasItems() ?? false)
                     {
                         var page = product.pages.FirstOrDefault(a => a.type is string type && type == "productHome");
                         if (page == null)
@@ -300,25 +329,32 @@ namespace MetadataLocal
         }
 
         // Override Xbox function GetTitleInfo in WebApiClient on XboxLibrary.
-        public static string GetXboxData(MetadataLocal plugin, string Url)
+        public static string GetXboxData(string Url)
         {
             string Description = string.Empty;
-            string WebResponse = Web.DownloadStringData(Url).GetAwaiter().GetResult();
 
-            if (!WebResponse.IsNullOrEmpty())
+            if (!Url.IsNullOrEmpty())
             {
-                HtmlParser parser = new HtmlParser();
-                IHtmlDocument htmlDocument = parser.Parse(WebResponse);
+                string WebResponse = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                if (!WebResponse.IsNullOrEmpty())
+                {
+                    HtmlParser parser = new HtmlParser();
+                    IHtmlDocument htmlDocument = parser.Parse(WebResponse);
 
-                Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
-                if (Description.IsNullOrEmpty())
-                {
-                    Description = string.Empty;
+                    Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
+                    if (Description.IsNullOrEmpty())
+                    {
+                        Description = string.Empty;
+                    }
+                    else
+                    {
+                        Description = Description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
+                    }
                 }
-                else
-                {
-                    Description = Description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
-                }
+            }
+            else
+            {
+                Common.LogDebug(true, $"No url");
             }
 
             return Description;
@@ -337,9 +373,15 @@ namespace MetadataLocal
                     + GameName.Replace("&", string.Empty).Replace("-", string.Empty).Replace(":", string.Empty) + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
-                var ListData = responseObject.results.First().hits;
+                Serialization.TryFromJson(response, out UbisoftSearchResponse parsedData);
+                if (parsedData?.results?.First()?.hits == null)
+                {
+                    logger.Warn($"No Ubisoft data find for {GameName}" + (Id.IsNullOrEmpty() ? "" : " with {Id}"));
+                    return string.Empty;
+                }
+
+                var ListData = parsedData.results.First().hits;
                 UbisoftLibrary.GameStoreSearchResponse Data;
                 if (!Id.IsNullOrEmpty() && Id.Length > 5)
                 {
