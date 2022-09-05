@@ -21,6 +21,7 @@ using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 using CommonPluginsStores.Steam;
 using CommonPluginsStores.Origin;
+using CommonPluginsShared.Extensions;
 
 namespace MetadataLocal
 {
@@ -344,7 +345,15 @@ namespace MetadataLocal
                     Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
                     if (Description.IsNullOrEmpty())
                     {
-                        Description = string.Empty;
+                        Description = htmlDocument.QuerySelectorAll("p")
+                            .Where(x => x.ClassName?.Contains("Description-module__description", StringComparison.InvariantCultureIgnoreCase) ?? false)
+                            ?.FirstOrDefault()
+                            ?.InnerHtml;
+
+                        if (Description.IsNullOrEmpty())
+                        {
+                            Description = string.Empty;
+                        }
                     }
                     else
                     {
@@ -599,12 +608,12 @@ namespace MetadataLocal
                 string str = Web.DownloadStringDataJson(string.Format(suggestUrl, WebUtility.UrlEncode(searchTerm))).GetAwaiter().GetResult();
                 MicrosoftSuggestResult microsoftSuggestResult = Serialization.FromJson<MicrosoftSuggestResult>(str);
 
-                foreach (var suggest in microsoftSuggestResult?.ResultSets?[0].Suggests)
+                foreach (var suggest in microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault()?.Suggests)
                 {
                     string gameName = suggest.Title;
-                    string gameImg = "https:" + suggest.ImageUrl;
+                    string gameImg = (suggest.ImageUrl.Contains("https:") ? string.Empty :"https:") + suggest.ImageUrl;
                     string gamePfns = string.Empty;
-                    string StoreUrl = "https:" + suggest.Url;
+                    string StoreUrl = (suggest.Url.Contains("https:") ? string.Empty : "https:") + suggest.Url;
 
                     results.Add(new SearchResult
                     {
