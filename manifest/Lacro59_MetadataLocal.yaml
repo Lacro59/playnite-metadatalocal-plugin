@@ -40,3 +40,12 @@ Packages:
       - Added missing store in plugin settings
       - Fixed minor UI issue
       - Updated localizations
+  - Version: 3.0
+    RequiredApiVersion: 6.3.0
+    ReleaseDate: 2022-09-06
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v3.0/playnite-metadatalocal-plugin_3_0.pext
+    Changelog:
+      - Only Playnite 10
+      - Fixed minor issue
+      - Fixed an issue with Xbox data
+      - Updated localizations
