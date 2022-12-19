@@ -62,6 +62,11 @@ namespace MetadataLocal
                 {
                     Settings.Stores.Find(x => x.Name.IsEqual("Ubisoft")).Name = "Ubisoft Connect";
                 }
+
+                if (Settings.Stores.Find(x => x.Name.IsEqual("GOG")) == null)
+                {
+                    Settings.Stores.Add(new Store { Name = "GOG" });
+                }
             }
         }
 
