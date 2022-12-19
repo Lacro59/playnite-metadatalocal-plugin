@@ -49,3 +49,12 @@ Packages:
       - Fixed minor issue
       - Fixed an issue with Xbox data
       - Updated localizations
+  - Version: 3.0.1
+    RequiredApiVersion: 6.8.0
+    ReleaseDate: 2022-12-19
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v3.0.1/playnite-metadatalocal-plugin_3_0_1.pext
+    Changelog:
+      - Fixed minor issue
+      - Updated store names
+      - Fixed an issue with Epic search data
+      - Updated localizations
