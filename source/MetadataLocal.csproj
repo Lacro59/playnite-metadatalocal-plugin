@@ -79,7 +79,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EpicLibrary\WebStoreModelsAppsList.cs" />
     <Compile Include="MetadataLocal.cs" />
     <Compile Include="MetadataLocalProvider.cs" />
     <Compile Include="MetadataLocalSettings.cs" />
@@ -99,7 +98,6 @@
     <Compile Include="Models\SearchResult.cs" />
     <Compile Include="OriginLibrary\GameStoreSearchResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EpicLibrary\WebStoreClient.cs" />
     <Compile Include="Views\MetadataLocalStoreSelection.xaml.cs">
       <DependentUpon>MetadataLocalStoreSelection.xaml</DependentUpon>
     </Compile>
@@ -250,6 +248,6 @@
   <Import Project="playnite-plugincommon\CommonPluginsStores\CommonPluginsStores.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>powershell -ExecutionPolicy Unrestricted $(SolutionDir)..\build\build.ps1 -ConfigurationName $(ConfigurationName) -OutDir $(SolutionDir)$(OutDir)</PostBuildEvent>
+    <PostBuildEvent>powershell -ExecutionPolicy Unrestricted $(SolutionDir)..\build\build.ps1 -ConfigurationName $(ConfigurationName) -OutDir $(SolutionDir)$(OutDir) -SolutionDir $(SolutionDir)</PostBuildEvent>
   </PropertyGroup>
 </Project>

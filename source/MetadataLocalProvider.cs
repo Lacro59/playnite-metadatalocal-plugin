@@ -14,7 +14,6 @@ using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Playnite.SDK.Data;
-using MetadataLocal.EpicLibrary;
 using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
@@ -22,6 +21,7 @@ using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 using CommonPluginsStores.Steam;
 using CommonPluginsStores.Origin;
 using CommonPluginsShared.Extensions;
+using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
 
 namespace MetadataLocal
 {
