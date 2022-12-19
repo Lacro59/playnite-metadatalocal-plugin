@@ -46,6 +46,7 @@ namespace MetadataLocal.Views
                     rbGog.IsChecked = true;
                     break;
 
+                case "ea app":
                 case "origin":
                     rbOrigin.IsChecked = true;
                     break;

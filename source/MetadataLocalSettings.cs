@@ -46,10 +46,22 @@ namespace MetadataLocal
             {
                 Settings.Stores.Add(new Store { Name = "Steam" });
                 Settings.Stores.Add(new Store { Name = "Epic" });
-                Settings.Stores.Add(new Store { Name = "Origin" });
+                Settings.Stores.Add(new Store { Name = "EA app" });
                 Settings.Stores.Add(new Store { Name = "Xbox" });
-                Settings.Stores.Add(new Store { Name = "Ubisoft" });
+                Settings.Stores.Add(new Store { Name = "Ubisoft Connect" });
                 Settings.Stores.Add(new Store { Name = "GOG" });
+            }
+            else
+            {
+                if (Settings.Stores.Find(x => x.Name.IsEqual("Origin")) != null)
+                {
+                    Settings.Stores.Find(x => x.Name.IsEqual("Origin")).Name = "EA app";
+                }
+
+                if (Settings.Stores.Find(x => x.Name.IsEqual("Ubisoft")) != null)
+                {
+                    Settings.Stores.Find(x => x.Name.IsEqual("Ubisoft")).Name = "Ubisoft Connect";
+                }
             }
         }
 

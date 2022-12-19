@@ -185,6 +185,7 @@ namespace MetadataLocal
                                 }
                                 break;
 
+                            case "ea app":
                             case "origin":
                                 Description = GetOriginData(GameId, PlayniteLanguage);
                                 break;
