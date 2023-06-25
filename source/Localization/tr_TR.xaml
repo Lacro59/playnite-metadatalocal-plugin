@@ -3,11 +3,11 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Store selection for metadata source</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Metaveri kaynağı için mağaza seçimi</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">Enable store selection for metadata source when downloading metadata</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Metaveri indirilirken metaveri kaynağı için mağaza seçimini etkinleştir</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Desteklenmeyen mağazalar için oyun arama sırası</sys:String>
 
 </ResourceDictionary>
