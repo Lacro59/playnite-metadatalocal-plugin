@@ -1,0 +1,13 @@
+﻿<?xml version="1.0"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- MetadataLocalStoreSelection -->
+
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Metaveri kaynağı için mağaza seçimi</sys:String>
+
+    <!-- MetadataLocalSettingsView -->
+
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Metaveri indirilirken metaveri kaynağı için mağaza seçimini etkinleştir</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Desteklenmeyen mağazalar için oyun arama sırası</sys:String>
+
+</ResourceDictionary>

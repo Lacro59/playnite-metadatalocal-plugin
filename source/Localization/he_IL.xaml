@@ -7,7 +7,7 @@
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">在下载元数据时为元数据源启用商店选择</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">不支持的商店的游戏的搜索顺序</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect">Enable store selection for metadata source when downloading metadata</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
 
 </ResourceDictionary>
