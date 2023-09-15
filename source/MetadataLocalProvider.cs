@@ -22,6 +22,8 @@ using CommonPluginsStores.Steam;
 using CommonPluginsStores.Origin;
 using CommonPluginsShared.Extensions;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
+using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
+using AngleSharp.Dom;
 
 namespace MetadataLocal
 {
@@ -57,7 +59,7 @@ namespace MetadataLocal
 
         private List<MetadataField> GetAvailableFields()
         {
-            var fields = new List<MetadataField> { MetadataField.Name };
+            List<MetadataField> fields = new List<MetadataField> { MetadataField.Name };
             fields.Add(MetadataField.Description);
             return fields;
         }
@@ -158,9 +160,7 @@ namespace MetadataLocal
                                 if (appId != 0)
                                 {
                                     Data = GetSteamData(appId, PlayniteLanguage);
-                                    Serialization.TryFromJson(Data, out Dictionary<string, StoreAppDetailsResult> parsedData);
-
-                                    if (parsedData != null)
+                                    if (Serialization.TryFromJson(Data, out Dictionary<string, StoreAppDetailsResult> parsedData))
                                     {
                                         Description = parsedData[appId.ToString()]?.data?.about_the_game;
                                     }
@@ -173,9 +173,7 @@ namespace MetadataLocal
                         
                             case "gog":
                                 Data = GetGogData(GameId, PlayniteLanguage);
-                                Serialization.TryFromJson(Data, out ProductApiDetail gogParsedData);
-                                
-                                if (gogParsedData != null)
+                                if (Serialization.TryFromJson(Data, out ProductApiDetail gogParsedData))
                                 {
                                     Description = gogParsedData.description?.full;
                                 }
@@ -229,14 +227,7 @@ namespace MetadataLocal
                     }
                 }
 
-                if (Description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty())
-                {
-                    return base.GetDescription(args);
-                }
-                else
-                {
-                    return Description;
-                }
+                return Description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty() ? base.GetDescription(args) : Description;
             }
             catch (Exception ex)
             {
@@ -447,19 +438,19 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
 
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
             string searchUrl = string.Empty;
 
             try
             {
-                if (uint.TryParse(searchTerm, out var appId))
+                if (uint.TryParse(searchTerm, out uint appId))
                 {
-                    using (var webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    using (WebClient webClient = new WebClient { Encoding = Encoding.UTF8 })
                     {
                         searchUrl = @"https://store.steampowered.com/api/appdetails?appids={0}";
-                        var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, appId));
-                        var parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
-                        var response = parsedData[appId.ToString()];
+                        string searchPageSrc = webClient.DownloadString(string.Format(searchUrl, appId));
+                        Dictionary<string, StoreAppDetailsResult> parsedData = Serialization.FromJson<Dictionary<string, StoreAppDetailsResult>>(searchPageSrc);
+                        StoreAppDetailsResult response = parsedData[appId.ToString()];
 
                         results.Add(new SearchResult
                         {
@@ -472,23 +463,23 @@ namespace MetadataLocal
                 }
                 else
                 {
-                    using (var webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    using (WebClient webClient = new WebClient { Encoding = Encoding.UTF8 })
                     {
                         searchUrl = @"https://store.steampowered.com/search/?term={0}";
-                        var searchPageSrc = webClient.DownloadString(string.Format(searchUrl, searchTerm));
-                        var parser = new HtmlParser();
-                        var searchPage = parser.Parse(searchPageSrc);
+                        string searchPageSrc = webClient.DownloadString(string.Format(searchUrl, searchTerm));
+                        HtmlParser parser = new HtmlParser();
+                        IHtmlDocument searchPage = parser.Parse(searchPageSrc);
 
-                        foreach (var gameElem in searchPage.QuerySelectorAll(".search_result_row"))
+                        foreach (IElement gameElem in searchPage.QuerySelectorAll(".search_result_row"))
                         {
-                            var title = gameElem.QuerySelector(".title").InnerHtml;
-                            var img = gameElem.QuerySelector(".search_capsule img").GetAttribute("src");
-                            var releaseDate = gameElem.QuerySelector(".search_released").InnerHtml;
+                            string title = gameElem.QuerySelector(".title").InnerHtml;
+                            string img = gameElem.QuerySelector(".search_capsule img").GetAttribute("src");
+                            string releaseDate = gameElem.QuerySelector(".search_released").InnerHtml;
                             if (gameElem.HasAttribute("data-ds-packageid"))
                             {
                                 continue;
                             }
-                            var gameId = gameElem.GetAttribute("data-ds-appid");
+                            string gameId = gameElem.GetAttribute("data-ds-appid");
 
                             if (!gameId.IsNullOrEmpty())
                             {
@@ -517,7 +508,7 @@ namespace MetadataLocal
             Common.LogDebug(true, $"GetMultiOriginData({searchTerm})");
 
             string searchUrl = @"https://api1.origin.com/xsearch/store/fr_fr/fra/products?searchTerm={0}&start=0&rows=20&isGDP=true";
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
 
             try
             {
@@ -529,10 +520,10 @@ namespace MetadataLocal
 
                 if (listOriginGames.HasItems())
                 {
-                    foreach (var OriginGame in listOriginGames)
+                    foreach (OriginLibrary.GameStoreSearchResponse OriginGame in listOriginGames)
                     {
-                        var title = OriginGame.gameName.Trim(); ;
-                        var img = OriginGame.image;
+                        string title = OriginGame.gameName.Trim(); ;
+                        string img = OriginGame.image;
 
                         OriginApi originApi = new OriginApi(PluginUserDataPath);
                         string gameId = originApi.GetOriginId(title);
@@ -564,16 +555,16 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiEpicData({searchTerm})");
 
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
 
             try
             {
-                using (var client = new WebStoreClient())
+                using (WebStoreClient client = new WebStoreClient())
                 {
-                    var catalogs = client.QuerySearch(searchTerm).GetAwaiter().GetResult();
+                    List<WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement> catalogs = client.QuerySearch(searchTerm).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
-                        foreach (var gameInfo in catalogs)
+                        foreach (WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement gameInfo in catalogs)
                         {
                             results.Add(new SearchResult
                             {
@@ -601,7 +592,7 @@ namespace MetadataLocal
             string searchUrl = "https://www.microsoft.com/" + CodeLang.GetEpicLang(PlayniteLanguage) + "/search/shop/games?q={0}";
             string suggestUrl = "https://www.microsoft.com/services/api/v3/suggest?market=" + CodeLang.GetEpicLang(PlayniteLanguage) 
                 + "&clientId=7F27B536-CF6B-4C65-8638-A0F8CBDFCA65&sources=Iris-Products%2CDCatAll-Products%2CMicrosoft-Terms&filter=%2BClientType%3AStoreWeb&counts=1%2C5%2C5&query={0}";
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
 
 
             try
@@ -609,7 +600,7 @@ namespace MetadataLocal
                 string str = Web.DownloadStringDataJson(string.Format(suggestUrl, WebUtility.UrlEncode(searchTerm))).GetAwaiter().GetResult();
                 MicrosoftSuggestResult microsoftSuggestResult = Serialization.FromJson<MicrosoftSuggestResult>(str);
 
-                foreach (var suggest in microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault()?.Suggests)
+                foreach (Suggest suggest in microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault()?.Suggests)
                 {
                     string gameName = suggest.Title;
                     string gameImg = (suggest.ImageUrl.Contains("https:") ? string.Empty :"https:") + suggest.ImageUrl;
@@ -643,7 +634,7 @@ namespace MetadataLocal
                     IHtmlDocument htmlDocument = parser.Parse(str);
 
                     int i = 0;
-                    foreach (var gameElem in htmlDocument.QuerySelectorAll("div.m-channel-placement-item"))
+                    foreach (AngleSharp.Dom.IElement gameElem in htmlDocument.QuerySelectorAll("div.m-channel-placement-item"))
                     {
                         if (i == 10)
                         {
@@ -656,7 +647,7 @@ namespace MetadataLocal
                         string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
 
 
-                        var el = results.Where(x => x.Name == WebUtility.HtmlDecode(gameName)).FirstOrDefault();
+                        SearchResult el = results.Where(x => x.Name == WebUtility.HtmlDecode(gameName)).FirstOrDefault();
                         if (el == null)
                         {
                             results.Add(new SearchResult
@@ -685,7 +676,7 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiUbisoftData({searchTerm})");
 
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
             string url = @"https://xely3u4lod-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=XELY3U4LOD&x-algolia-api-key=5638539fd9edb8f2c6b024b49ec375bd";
 
             try
@@ -697,10 +688,10 @@ namespace MetadataLocal
                     + searchTerm + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
-                var responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
+                UbisoftSearchResponse responseObject = Serialization.FromJson<UbisoftSearchResponse>(response);
 
-                var ListData = responseObject.results.First().hits;
-                foreach (var game in ListData)
+                List<GameStoreSearchResponse> ListData = responseObject.results.First().hits;
+                foreach (GameStoreSearchResponse game in ListData)
                 {
                     string gameName = game.title;
                     string gameImg = game.additional_image_link;
@@ -727,7 +718,7 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
 
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
             string searchUrl = "https://www.gog.com/games/ajax/filtered?limit=20&search={0}";
             searchUrl = string.Format(searchUrl, WebUtility.UrlEncode(searchTerm));
 

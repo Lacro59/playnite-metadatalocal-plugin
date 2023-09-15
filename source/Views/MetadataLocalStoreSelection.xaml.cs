@@ -141,7 +141,8 @@ namespace MetadataLocal.Views
             Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft, IsGog))
                 .ContinueWith(antecedent =>
                 {
-                    this.Dispatcher.Invoke(new Action(() => {
+                    this.Dispatcher.Invoke(new Action(() =>
+                    {
                         if (antecedent.Result != null)
                         {
                             lbSelectable.ItemsSource = antecedent.Result;
@@ -155,9 +156,9 @@ namespace MetadataLocal.Views
                 });
         }
 
-        private async Task<List<SearchResult>> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft, bool IsGog)
+        private List<SearchResult> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft, bool IsGog)
         {
-            var results = new List<SearchResult>();
+            List<SearchResult> results = new List<SearchResult>();
 
             if (IsSteam)
             {

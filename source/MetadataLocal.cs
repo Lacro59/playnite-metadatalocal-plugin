@@ -33,7 +33,6 @@ namespace MetadataLocal
             PluginSettings = new MetadataLocalSettingsViewModel(this);
             PlayniteConfigurationPath = api.Paths.ConfigurationPath;
 
-
             // Get plugin's location 
             string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
