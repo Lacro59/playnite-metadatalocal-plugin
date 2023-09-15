@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
+             xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls" xmlns:controls="clr-namespace:CommonPluginsShared.Controls"
              mc:Ignorable="d" Height="660" Width="700" >
 
     <Grid>
@@ -122,7 +122,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <Image Grid.Column="0" Source="{Binding ImageUrl}" Stretch="UniformToFill" Height="45" Width="120"></Image>
+                                <controls:ImageAsync Grid.Column="0" Source="{Binding ImageUrl}" Stretch="UniformToFill" Height="45" Width="120"></controls:ImageAsync>
                                 <Label Grid.Column="2" Content="{Binding Name}" VerticalAlignment="Center" />
                             </Grid>
                         </DataTemplate>
