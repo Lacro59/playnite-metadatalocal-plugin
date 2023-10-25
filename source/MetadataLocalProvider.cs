@@ -24,6 +24,8 @@ using CommonPluginsShared.Extensions;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using AngleSharp.Dom;
+using CommonPluginsStores.Gog;
+using CommonPluginsStores.Models;
 
 namespace MetadataLocal
 {
@@ -172,15 +174,7 @@ namespace MetadataLocal
                                 break;
                         
                             case "gog":
-                                Data = GetGogData(GameId, PlayniteLanguage);
-                                if (Serialization.TryFromJson(Data, out ProductApiDetail gogParsedData))
-                                {
-                                    Description = gogParsedData.description?.full;
-                                }
-                                else
-                                {
-                                    Common.LogDebug(true, $"No GOG data find for {GameName} with {GameId}");
-                                }
+                                Description = GetGogData(GameId, PlayniteLanguage);
                                 break;
 
                             case "ea app":
@@ -256,28 +250,16 @@ namespace MetadataLocal
 
         public static string GetOriginData(string gameId, string PlayniteLanguage)
         {
-            string url = string.Empty;
             try
             {
-                string OriginLang = CodeLang.GetOriginLang(PlayniteLanguage);
-                string OriginLangCountry = CodeLang.GetOriginLangCountry(PlayniteLanguage);
-                url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/{1}?country={2}", gameId, OriginLang, OriginLangCountry);
-                var stringData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-
-                Serialization.TryFromJson(stringData, out GameStoreDataResponse parsedData);
-                if (parsedData?.i18n?.longDescription != null)
-                {
-                    return parsedData.i18n.longDescription;
-                }
-                else
-                {
-                    Common.LogDebug(true, $"No Origin data find with {gameId}");
-                    return string.Empty;
-                }
+                OriginApi originApi = new OriginApi("MetadataLocal");
+                originApi.SetLanguage(PlayniteLanguage);
+                GameInfos gameInfos = originApi.GetGameInfos(gameId, null);
+                return gameInfos.Description;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Failed to load {url}");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -414,18 +396,16 @@ namespace MetadataLocal
 
         public static string GetGogData(string gameId, string PlayniteLanguage)
         {
-            string url = @"http://api.gog.com/products/{0}?expand=description";
-            string UrlGogLang = @"https://www.gog.com/user/changeLanguage/{0}";
-
             try
             {
-                string GogLangCode = CodeLang.GetGogLang(PlayniteLanguage);
-                string UrlLang = string.Format(UrlGogLang, GogLangCode.ToLower());
-                return Web.DownloadStringDataWithUrlBefore(string.Format(url, gameId), UrlLang).GetAwaiter().GetResult();
+                GogApi gogApi = new GogApi("MetadataLocal");
+                gogApi.SetLanguage(PlayniteLanguage);
+                GameInfos gameInfos = gogApi.GetGameInfos(gameId, null);
+                return gameInfos.Description;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Failed to load {url}");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -507,7 +487,7 @@ namespace MetadataLocal
         {
             Common.LogDebug(true, $"GetMultiOriginData({searchTerm})");
 
-            string searchUrl = @"https://api1.origin.com/xsearch/store/fr_fr/fra/products?searchTerm={0}&start=0&rows=20&isGDP=true";
+            string searchUrl = @"https://api1.origin.com/xsearch/store/en_US/usa/products?searchTerm={0}&start=0&rows=20&isGDP=true";
             List<SearchResult> results = new List<SearchResult>();
 
             try
