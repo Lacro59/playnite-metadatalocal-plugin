@@ -58,3 +58,9 @@ Packages:
       - Updated store names
       - Fixed an issue with Epic search data
       - Updated localizations
+  - Version: 3.0.2
+    RequiredApiVersion: 6.10.0
+    ReleaseDate: 2023-10-15
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v3.0.2/playnite-metadatalocal-plugin_3_0_2.pext
+    Changelog:
+      - Updated localizations
