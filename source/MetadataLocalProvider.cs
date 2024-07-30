@@ -31,18 +31,17 @@ namespace MetadataLocal
 {
     public class MetadataLocalProvider : OnDemandMetadataProvider
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
+        private static ILogger Logger => LogManager.GetLogger();
 
-        private MetadataLocalSettings Settings;
+        private MetadataLocalSettings Settings { get; set; }
 
-        private readonly MetadataRequestOptions Options;
-        private readonly MetadataLocal Plugin;
+        private MetadataRequestOptions Options { get; }
+        private MetadataLocal Plugin { get; }
 
         public string PlayniteConfigurationPath { get; set; }
         public static string PlayniteLanguage { get; set; }
 
-        private string ForceStoreName = string.Empty;
+        private string ForceStoreName { get; set; } = string.Empty;
 
 
         private List<MetadataField> availableFields;
@@ -66,11 +65,11 @@ namespace MetadataLocal
             return fields;
         }
 
-        public MetadataLocalProvider(MetadataRequestOptions options, MetadataLocal plugin, string PlayniteConfigurationPath, MetadataLocalSettings settings)
+        public MetadataLocalProvider(MetadataRequestOptions options, MetadataLocal plugin, string playniteConfigurationPath, MetadataLocalSettings settings)
         {
             Options = options;
             Plugin = plugin;
-            this.PlayniteConfigurationPath = PlayniteConfigurationPath;
+            PlayniteConfigurationPath = playniteConfigurationPath;
             Settings = settings;
         }
 
@@ -78,8 +77,8 @@ namespace MetadataLocal
         public override string GetDescription(GetMetadataFieldArgs args)
         {
             // Get type source, data and description
-            string Data;
-            string Description = string.Empty;
+            string data;
+            string description = string.Empty;
 
             try
             {
@@ -88,32 +87,32 @@ namespace MetadataLocal
                     // Get Playnite language
                     PlayniteLanguage = Plugin.PlayniteApi.ApplicationSettings.Language;
 
-                    string GameId = string.Empty;
-                    string GameName = string.Empty;
-                    string StoreName = ForceStoreName;
-                    string StoreUrl = string.Empty;
+                    string gameId = string.Empty;
+                    string gameName = string.Empty;
+                    string storeName = ForceStoreName;
+                    string storeUrl = string.Empty;
 
                     try
                     {
-                        GameId = Options.GameData.GameId;
-                        GameName = Options.GameData.Name;
+                        gameId = Options.GameData.GameId;
+                        gameName = Options.GameData.Name;
 
                         if (Options.GameData.SourceId != default(Guid))
                         {
-                            if (StoreName.IsNullOrEmpty())
+                            if (storeName.IsNullOrEmpty())
                             {
-                                StoreName = Options.GameData.Source.Name;
+                                storeName = Options.GameData.Source.Name;
                             }
                         }
                         else
                         {
                             if (ForceStoreName.IsNullOrEmpty())
                             {
-                                logger.Warn("No source name");
+                                Logger.Warn("No source name");
                             }
                             else
                             {
-                                StoreName = ForceStoreName;
+                                storeName = ForceStoreName;
                             }
                         }
 
@@ -124,76 +123,76 @@ namespace MetadataLocal
                             MetadataLocalStoreSelection ViewExtension = null;
                             Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
-                                ViewExtension = new MetadataLocalStoreSelection(Plugin.PlayniteApi, StoreName, GameName, Plugin.GetPluginUserDataPath());
-                                Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(Plugin.PlayniteApi, resources.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
+                                ViewExtension = new MetadataLocalStoreSelection(storeName, gameName, Plugin.GetPluginUserDataPath());
+                                Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(ResourceProvider.GetString("LOCMetadataLocalStoreSelection"), ViewExtension);
                                 windowExtension.ShowDialog();
                             }));
 
                             if (!ViewExtension.StoreResult.StoreName.IsNullOrEmpty())
                             {
-                                GameId = ViewExtension.StoreResult.StoreId;
-                                GameName = ViewExtension.StoreResult.Name;
-                                StoreName = ViewExtension.StoreResult.StoreName;
-                                StoreUrl = ViewExtension.StoreResult.StoreUrl;
+                                gameId = ViewExtension.StoreResult.StoreId;
+                                gameName = ViewExtension.StoreResult.Name;
+                                storeName = ViewExtension.StoreResult.StoreName;
+                                storeUrl = ViewExtension.StoreResult.StoreUrl;
                             }
                             else
                             {
-                                GameId = string.Empty;
-                                GameName = string.Empty;
-                                StoreName = string.Empty;
-                                StoreUrl = string.Empty;
+                                gameId = string.Empty;
+                                gameName = string.Empty;
+                                storeName = string.Empty;
+                                storeUrl = string.Empty;
                             }
                         }
 
 
-                        switch (StoreName.ToLower())
+                        switch (storeName.ToLower())
                         {
                             case "steam":
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
-                                    appId = (uint)new SteamApi("MetadataLocal").GetAppId(GameName);
+                                    appId = (uint)new SteamApi("MetadataLocal").GetAppId(gameName);
                                 }
                                 else
                                 {
-                                    uint.TryParse(GameId, out appId);
+                                    uint.TryParse(gameId, out appId);
                                 }
 
                                 if (appId != 0)
                                 {
-                                    Data = GetSteamData(appId, PlayniteLanguage);
-                                    if (Serialization.TryFromJson(Data, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                                    data = GetSteamData(appId, PlayniteLanguage);
+                                    if (Serialization.TryFromJson(data, out Dictionary<string, StoreAppDetailsResult> parsedData))
                                     {
-                                        Description = parsedData[appId.ToString()]?.data?.about_the_game;
+                                        description = parsedData[appId.ToString()]?.data?.about_the_game;
                                     }
                                     else
                                     {
-                                        Common.LogDebug(true, $"No Steam data find for {GameName} with {appId}");
+                                        Common.LogDebug(true, $"No Steam data find for {gameName} with {appId}");
                                     }
                                 }
                                 break;
                         
                             case "gog":
-                                Description = GetGogData(GameId, PlayniteLanguage);
+                                description = GetGogData(gameId, PlayniteLanguage);
                                 break;
 
                             case "ea app":
                             case "origin":
-                                Description = GetOriginData(GameId, PlayniteLanguage);
+                                description = GetOriginData(gameId, PlayniteLanguage);
                                 break;
 
                             case "epic":
-                                Description = GetEpicData(GameName);
+                                description = GetEpicData(gameName);
                                 break;
 
                             case "xbox":
-                                Description = GetXboxData(StoreUrl);
+                                description = GetXboxData(storeUrl);
                                 break;
 
                             case "ubisoft":
                             case "uplay":
                             case "ubisoft connect":
-                                Description = GetUbisoftData(GameName, PlayniteLanguage, GameId);
+                                description = GetUbisoftData(gameName, PlayniteLanguage, gameId);
                                 break;
 
                             default:
@@ -203,12 +202,12 @@ namespace MetadataLocal
                                     foreach (Store store in Settings.Stores)
                                     {
                                         ForceStoreName = store.Name;
-                                        Description = GetDescription(args);
+                                        description = GetDescription(args);
 
-                                        if (!Description.IsNullOrEmpty())
+                                        if (!description.IsNullOrEmpty())
                                         {
-                                            Common.LogDebug(true, $"Find with {ForceStoreName} for {GameName}");
-                                            return Description;
+                                            Common.LogDebug(true, $"Find with {ForceStoreName} for {gameName}");
+                                            return description;
                                         }
                                     }
                                 }
@@ -217,11 +216,11 @@ namespace MetadataLocal
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false, $"Error with {GameName} - {GameId} - {StoreName}");
+                        Common.LogError(ex, false, $"Error with {gameName} - {gameId} - {storeName}");
                     }
                 }
 
-                return Description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty() ? base.GetDescription(args) : Description;
+                return description.IsNullOrEmpty() && ForceStoreName.IsNullOrEmpty() ? base.GetDescription(args) : description;
             }
             catch (Exception ex)
             {
@@ -232,12 +231,12 @@ namespace MetadataLocal
 
 
         #region Search one to one
-        public static string GetSteamData(uint appId, string PlayniteLanguage)
+        public static string GetSteamData(uint appId, string playniteLanguage)
         {
             string url = string.Empty;
             try
             {
-                string SteamLangCode = CodeLang.GetSteamLang(PlayniteLanguage);
+                string SteamLangCode = CodeLang.GetSteamLang(playniteLanguage);
                 url = $"https://store.steampowered.com/api/appdetails?appids={appId}&l={SteamLangCode}";
                 return Web.DownloadStringData(url).GetAwaiter().GetResult();
             }
@@ -248,12 +247,12 @@ namespace MetadataLocal
             }
         }
 
-        public static string GetOriginData(string gameId, string PlayniteLanguage)
+        public static string GetOriginData(string gameId, string playniteLanguage)
         {
             try
             {
                 OriginApi originApi = new OriginApi("MetadataLocal");
-                originApi.SetLanguage(PlayniteLanguage);
+                originApi.SetLanguage(playniteLanguage);
                 GameInfos gameInfos = originApi.GetGameInfos(gameId, null);
                 return gameInfos.Description;
             }
@@ -268,7 +267,7 @@ namespace MetadataLocal
         {
             using (var client = new WebStoreClient())
             {
-                string Description = string.Empty;
+                string description = string.Empty;
                 var catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
                 if (catalogs?.HasItems() ?? false)
                 {
@@ -287,51 +286,51 @@ namespace MetadataLocal
                             page = product.pages[0];
                         }
 
-                        Description = page.data.about.description;
-                        if (!Description.IsNullOrEmpty())
+                        description = page.data.about.description;
+                        if (!description.IsNullOrEmpty())
                         {
-                            Description = Description.Replace("\n", "\n<br>");
-                            Description = Markup.MarkdownToHtml(Description);
-                            Description = Regex.Replace(
-                                Description,
+                            description = description.Replace("\n", "\n<br>");
+                            description = Markup.MarkdownToHtml(description);
+                            description = Regex.Replace(
+                                description,
                                 "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
                                 "<img src=\"$1\"/>");
                         }
                     }
                 }
-                return Description;
+                return description;
             }
         }
 
         // Override Xbox function GetTitleInfo in WebApiClient on XboxLibrary.
-        public static string GetXboxData(string Url)
+        public static string GetXboxData(string url)
         {
-            string Description = string.Empty;
+            string description = string.Empty;
 
-            if (!Url.IsNullOrEmpty())
+            if (!url.IsNullOrEmpty())
             {
-                string WebResponse = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-                if (!WebResponse.IsNullOrEmpty())
+                string webResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                if (!webResponse.IsNullOrEmpty())
                 {
                     HtmlParser parser = new HtmlParser();
-                    IHtmlDocument htmlDocument = parser.Parse(WebResponse);
+                    IHtmlDocument htmlDocument = parser.Parse(webResponse);
 
-                    Description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
-                    if (Description.IsNullOrEmpty())
+                    description = htmlDocument.QuerySelector("p#product-description")?.InnerHtml;
+                    if (description.IsNullOrEmpty())
                     {
-                        Description = htmlDocument.QuerySelectorAll("p")
+                        description = htmlDocument.QuerySelectorAll("p")
                             .Where(x => x.ClassName?.Contains("Description-module__description", StringComparison.InvariantCultureIgnoreCase) ?? false)
                             ?.FirstOrDefault()
                             ?.InnerHtml;
 
-                        if (Description.IsNullOrEmpty())
+                        if (description.IsNullOrEmpty())
                         {
-                            Description = string.Empty;
+                            description = string.Empty;
                         }
                     }
                     else
                     {
-                        Description = Description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
+                        description = description.Trim().Replace(Environment.NewLine, "<br>").Replace("\n", "<br>");
                     }
                 }
             }
@@ -340,39 +339,39 @@ namespace MetadataLocal
                 Common.LogDebug(true, $"No url");
             }
 
-            return Description;
+            return description;
         }
 
-        public static string GetUbisoftData(string GameName, string PlayniteLanguage, string Id = "")
+        public static string GetUbisoftData(string gameName, string playniteLanguage, string id = "")
         {
-            string Description = string.Empty;
+            string description = string.Empty;
             string url = @"https://xely3u4lod-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(3.35.1)%3B%20Browser&x-algolia-application-id=XELY3U4LOD&x-algolia-api-key=5638539fd9edb8f2c6b024b49ec375bd";
 
             try
             {
-                string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
+                string indexName = playniteLanguage.Split('_')[1].ToLower() + "_release_date";
                 string payload = "{\"requests\":[{\"indexName\":\"" + indexName
                     + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="
-                    + GameName.Replace("&", string.Empty).Replace("-", string.Empty).Replace(":", string.Empty) + "\"}]}";
+                    + gameName.Replace("&", string.Empty).Replace("-", string.Empty).Replace(":", string.Empty) + "\"}]}";
 
                 string response = Web.PostStringDataPayload(url, payload).GetAwaiter().GetResult();
 
                 Serialization.TryFromJson(response, out UbisoftSearchResponse parsedData);
                 if (parsedData?.results?.First()?.hits == null)
                 {
-                    logger.Warn($"No Ubisoft data find for {GameName}" + (Id.IsNullOrEmpty() ? "" : " with {Id}"));
+                    Logger.Warn($"No Ubisoft data find for {gameName}" + (id.IsNullOrEmpty() ? "" : " with {Id}"));
                     return string.Empty;
                 }
 
                 var ListData = parsedData.results.First().hits;
                 UbisoftLibrary.GameStoreSearchResponse Data;
-                if (!Id.IsNullOrEmpty() && Id.Length > 5)
+                if (!id.IsNullOrEmpty() && id.Length > 5)
                 {
-                    Data = ListData.Find(x => x.id == Id);
+                    Data = ListData.Find(x => x.id == id);
                 }
                 else
                 {
-                    Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.ToLower()));
+                    Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(gameName.ToLower()));
 
                     if (Data == null && ListData.Count == 1)
                     {
@@ -380,26 +379,26 @@ namespace MetadataLocal
                     }
                     else
                     {
-                        Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(GameName.Replace("&", "and").ToLower()));
+                        Data = ListData.Find(x => CommonPluginsShared.PlayniteTools.NormalizeGameName(x.title.ToLower()) == CommonPluginsShared.PlayniteTools.NormalizeGameName(gameName.Replace("&", "and").ToLower()));
                     }
                 }
 
-                Data?.html_description?.First().TryGetValue(PlayniteLanguage, out Description);
+                Data?.html_description?.First().TryGetValue(playniteLanguage, out description);
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
             }
 
-            return Description;
+            return description;
         }
 
-        public static string GetGogData(string gameId, string PlayniteLanguage)
+        public static string GetGogData(string gameId, string playniteLanguage)
         {
             try
             {
                 GogApi gogApi = new GogApi("MetadataLocal");
-                gogApi.SetLanguage(PlayniteLanguage);
+                gogApi.SetLanguage(playniteLanguage);
                 GameInfos gameInfos = gogApi.GetGameInfos(gameId, null);
                 return gameInfos.Description;
             }
@@ -483,7 +482,7 @@ namespace MetadataLocal
             return results;
         }
 
-        public static List<SearchResult> GetMultiOriginData(string searchTerm, string PluginUserDataPath)
+        public static List<SearchResult> GetMultiOriginData(string searchTerm, string pluginUserDataPath)
         {
             Common.LogDebug(true, $"GetMultiOriginData({searchTerm})");
 
@@ -505,7 +504,7 @@ namespace MetadataLocal
                         string title = OriginGame.gameName.Trim(); ;
                         string img = OriginGame.image;
 
-                        OriginApi originApi = new OriginApi(PluginUserDataPath);
+                        OriginApi originApi = new OriginApi(pluginUserDataPath);
                         string gameId = originApi.GetOriginId(title);
 
                         Common.LogDebug(true, $"Find for {title} - {gameId}");
@@ -565,7 +564,7 @@ namespace MetadataLocal
             return results;
         }
 
-        public static List<SearchResult> GetMultiXboxData(IPlayniteAPI PlayniteApi, string searchTerm)
+        public static List<SearchResult> GetMultiXboxData(string searchTerm)
         {
             Common.LogDebug(true, $"GetMultiXboxData({searchTerm})");
 
@@ -605,7 +604,7 @@ namespace MetadataLocal
 
             try
             {
-                using (IWebView webView = PlayniteApi.WebViews.CreateOffscreenView())
+                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
                 {
                     webView.NavigateAndWait(string.Format(searchUrl, WebUtility.UrlEncode(searchTerm)));
                     string str = webView.GetPageSource();
@@ -652,7 +651,7 @@ namespace MetadataLocal
             return results;
         }
 
-        public static List<SearchResult> GetMultiUbisoftData(IPlayniteAPI PlayniteApi, string searchTerm)
+        public static List<SearchResult> GetMultiUbisoftData(string searchTerm)
         {
             Common.LogDebug(true, $"GetMultiUbisoftData({searchTerm})");
 
@@ -661,7 +660,7 @@ namespace MetadataLocal
 
             try
             {
-                string PlayniteLanguage = PlayniteApi.ApplicationSettings.Language;
+                string PlayniteLanguage = API.Instance.ApplicationSettings.Language;
                 string indexName = PlayniteLanguage.Split('_')[1].ToLower() + "_release_date";
                 string payload = "{\"requests\":[{\"indexName\":\"" + indexName
                     + "\",\"params\":\"ruleContexts=%5B%22web%22%5D&hitsPerPage=30&clickAnalytics=true&enableRules=true&query="

@@ -27,8 +27,8 @@ namespace MetadataLocal
         private readonly MetadataLocal Plugin;
         private MetadataLocalSettings EditingClone { get; set; }
 
-        private MetadataLocalSettings _Settings;
-        public MetadataLocalSettings Settings { get => _Settings; set => SetValue(ref _Settings, value); }
+        private MetadataLocalSettings settings;
+        public MetadataLocalSettings Settings { get => settings; set => SetValue(ref settings, value); }
 
 
         public MetadataLocalSettingsViewModel(MetadataLocal plugin)
@@ -40,7 +40,7 @@ namespace MetadataLocal
             MetadataLocalSettings savedSettings = plugin.LoadPluginSettings<MetadataLocalSettings>();
 
             // LoadPluginSettings returns null if not saved data is available.
-            Settings = savedSettings != null ? savedSettings : new MetadataLocalSettings();
+            Settings = savedSettings ?? new MetadataLocalSettings();
 
             if (Settings.Stores.Count == 0)
             {

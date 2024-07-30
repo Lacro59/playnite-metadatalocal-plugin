@@ -37,8 +37,8 @@ namespace MetadataLocal
             string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // Set the common resourses & event
-            Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
-            Common.SetEvent(PlayniteApi);
+            Common.Load(PluginFolder, api.ApplicationSettings.Language);
+            Common.SetEvent();
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)

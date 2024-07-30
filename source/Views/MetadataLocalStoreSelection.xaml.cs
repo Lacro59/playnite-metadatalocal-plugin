@@ -17,26 +17,22 @@ namespace MetadataLocal.Views
     /// </summary>
     public partial class MetadataLocalStoreSelection : UserControl
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-        private IPlayniteAPI _PlayniteApi;
-
-        public string _PluginUserDataPath { get; set; }
+        public string PluginUserDataPath { get; set; }
         public SearchResult StoreResult { get; set; } = new SearchResult();
 
         public bool IsFirstLoad = true;
 
 
-        public MetadataLocalStoreSelection(IPlayniteAPI PlayniteApi, string StoreDefault, string GameName, string PluginUserDataPath)
+        public MetadataLocalStoreSelection(string storeDefault, string gameName, string pluginUserDataPath)
         {
-            _PlayniteApi = PlayniteApi;
-            _PluginUserDataPath = PluginUserDataPath;
+            PluginUserDataPath = pluginUserDataPath;
 
             InitializeComponent();
 
             PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
             PART_GridData.IsEnabled = true;
 
-            switch (StoreDefault.ToLower())
+            switch (storeDefault.ToLower())
             {
                 case "steam":
                     rbSteam.IsChecked = true;
@@ -70,7 +66,7 @@ namespace MetadataLocal.Views
                     break;
             }
 
-            SearchElement.Text = GameName;
+            SearchElement.Text = gameName;
 
             SearchElements();
             IsFirstLoad = false;
@@ -125,12 +121,12 @@ namespace MetadataLocal.Views
 
         private void SearchElements()
         {
-            bool IsSteam = (bool)rbSteam.IsChecked;
-            bool IsGog = (bool)rbGog.IsChecked;
-            bool IsOrigin = (bool)rbOrigin.IsChecked;
-            bool IsEpic = (bool)rbEpic.IsChecked;
-            bool IsXbox = (bool)rbXbox.IsChecked;
-            bool IsUbisoft = (bool)rbUbisoft.IsChecked;
+            bool isSteam = (bool)rbSteam.IsChecked;
+            bool isGog = (bool)rbGog.IsChecked;
+            bool isOrigin = (bool)rbOrigin.IsChecked;
+            bool isEpic = (bool)rbEpic.IsChecked;
+            bool isXbox = (bool)rbXbox.IsChecked;
+            bool isUbisoft = (bool)rbUbisoft.IsChecked;
 
             PART_DataLoadWishlist.Visibility = Visibility.Visible;
             PART_GridData.IsEnabled = false;
@@ -138,7 +134,7 @@ namespace MetadataLocal.Views
             string gameSearch = PlayniteTools.NormalizeGameName(SearchElement.Text);
 
             lbSelectable.ItemsSource = null;
-            Task task = Task.Run(() => LoadData(gameSearch, IsSteam, IsOrigin, IsEpic, IsXbox, IsUbisoft, IsGog))
+            Task task = Task.Run(() => LoadData(gameSearch, isSteam, isOrigin, isEpic, isXbox, isUbisoft, isGog))
                 .ContinueWith(antecedent =>
                 {
                     this.Dispatcher.Invoke(new Action(() =>
@@ -156,38 +152,38 @@ namespace MetadataLocal.Views
                 });
         }
 
-        private List<SearchResult> LoadData(string SearchElement, bool IsSteam, bool IsOrigin, bool IsEpic, bool IsXbox, bool IsUbisoft, bool IsGog)
+        private List<SearchResult> LoadData(string searchElement, bool isSteam, bool isOrigin, bool isEpic, bool isXbox, bool isUbisoft, bool isGog)
         {
             List<SearchResult> results = new List<SearchResult>();
 
-            if (IsSteam)
+            if (isSteam)
             {
-                results = MetadataLocalProvider.GetMultiSteamData(SearchElement);
+                results = MetadataLocalProvider.GetMultiSteamData(searchElement);
             }
 
-            if (IsGog)
+            if (isGog)
             {
-                results = MetadataLocalProvider.GetMultiSGogData(SearchElement);
+                results = MetadataLocalProvider.GetMultiSGogData(searchElement);
             }
 
-            if (IsOrigin)
+            if (isOrigin)
             {
-                results = MetadataLocalProvider.GetMultiOriginData(SearchElement, _PluginUserDataPath);
+                results = MetadataLocalProvider.GetMultiOriginData(searchElement, PluginUserDataPath);
             }
 
-            if (IsEpic)
+            if (isEpic)
             {
-                results = MetadataLocalProvider.GetMultiEpicData(SearchElement);
+                results = MetadataLocalProvider.GetMultiEpicData(searchElement);
             }
 
-            if (IsXbox)
+            if (isXbox)
             {
-                results = MetadataLocalProvider.GetMultiXboxData(_PlayniteApi, SearchElement);
+                results = MetadataLocalProvider.GetMultiXboxData(searchElement);
             }
 
-            if (IsUbisoft)
+            if (isUbisoft)
             {
-                results = MetadataLocalProvider.GetMultiUbisoftData(_PlayniteApi, SearchElement);
+                results = MetadataLocalProvider.GetMultiUbisoftData(searchElement);
             }
 
             return results;
