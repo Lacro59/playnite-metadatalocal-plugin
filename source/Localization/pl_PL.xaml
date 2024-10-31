@@ -8,6 +8,6 @@
     <!-- MetadataLocalSettingsView -->
 
     <sys:String x:Key="LOCMetadataLocalStoreSelect">Włącz wybór sklepu źródła metadanych przy pobieraniu metadanych</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">Search order for games for unsupported stores</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">Kolejność wyszukiwania gier dla niewspieranych sklepów</sys:String>
 
 </ResourceDictionary>
