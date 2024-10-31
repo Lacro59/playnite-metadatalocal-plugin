@@ -3,7 +3,7 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">اختيار المتجر المصدر لبيانات الوصف</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">اختيار المتجر المصدر لبيانات الوص</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
