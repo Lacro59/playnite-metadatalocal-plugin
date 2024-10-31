@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Plugins;
 using MetadataLocal.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 
 namespace MetadataLocal
 {
-    public class MetadataLocalSettings : ObservableObject
+    public class MetadataLocalSettings : PluginSettings
     {
         #region Settings variables
         public bool EnableSelectStore { get; set; } = false;
