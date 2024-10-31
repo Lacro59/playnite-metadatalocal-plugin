@@ -3,7 +3,7 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">Сохранить выбор источника метаданных</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection">Сохранить выбор источника метаданны</sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
