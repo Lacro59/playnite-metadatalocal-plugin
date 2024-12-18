@@ -569,21 +569,25 @@ namespace MetadataLocal
                 string str = Web.DownloadStringDataJson(string.Format(suggestUrl, WebUtility.UrlEncode(searchTerm))).GetAwaiter().GetResult();
                 MicrosoftSuggestResult microsoftSuggestResult = Serialization.FromJson<MicrosoftSuggestResult>(str);
 
-                foreach (Suggest suggest in microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault()?.Suggests)
+                ResultSet data = microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault();
+                if (data != null)
                 {
-                    string gameName = suggest.Title;
-                    string gameImg = (suggest.ImageUrl.Contains("https:") ? string.Empty : "https:") + suggest.ImageUrl;
-                    string gamePfns = string.Empty;
-                    string storeUrl = (suggest.Url.Contains("https:") ? string.Empty : "https:") + suggest.Url;
-
-                    results.Add(new SearchResult
+                    foreach (Suggest suggest in microsoftSuggestResult?.ResultSets?.Where(x => x.Source.IsEqual("dcatall-products"))?.FirstOrDefault()?.Suggests)
                     {
-                        Name = gameName,
-                        ImageUrl = gameImg,
-                        StoreName = "Xbox",
-                        StoreId = gamePfns,
-                        StoreUrl = storeUrl
-                    });
+                        string gameName = suggest.Title;
+                        string gameImg = (suggest.ImageUrl.Contains("https:") ? string.Empty : "https:") + suggest.ImageUrl;
+                        string gamePfns = string.Empty;
+                        string storeUrl = (suggest.Url.Contains("https:") ? string.Empty : "https:") + suggest.Url;
+
+                        results.Add(new SearchResult
+                        {
+                            Name = gameName,
+                            ImageUrl = gameImg,
+                            StoreName = "Xbox",
+                            StoreId = gamePfns,
+                            StoreUrl = storeUrl
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -603,20 +607,20 @@ namespace MetadataLocal
                     IHtmlDocument htmlDocument = parser.Parse(str);
 
                     int i = 0;
-                    foreach (IElement gameElem in htmlDocument.QuerySelectorAll("div.m-channel-placement-item"))
+                    foreach (IElement gameElem in htmlDocument.QuerySelectorAll("#shopDetailsWrapper div.card"))
                     {
                         if (i == 10)
                         {
                             break;
                         }
 
-                        string gameName = gameElem.QuerySelector("h3.c-subheading-6")?.InnerHtml?.Trim();
-                        string gameImg = gameElem.QuerySelector(".c-channel-placement-image picture img")?.GetAttribute("src");
-                        string gamePfns = gameElem.QuerySelector("a")?.GetAttribute("data-pfns");
-                        string StoreUrl = "https://www.microsoft.com" + gameElem.QuerySelector("a")?.GetAttribute("href");
+                        string gameName = gameElem.QuerySelector("h3 a")?.InnerHtml?.Trim();
+                        string gameImg = gameElem.QuerySelector("picture img")?.GetAttribute("src");
+                        string gamePfns = gameElem.GetAttribute("data-bi-pid");
+                        string storeUrl = gameElem.QuerySelector("h3 a")?.GetAttribute("href");
 
 
-                        SearchResult el = results.Where(x => x.Name == WebUtility.HtmlDecode(gameName)).FirstOrDefault();
+                        SearchResult el = results.FirstOrDefault(x => x.Name == WebUtility.HtmlDecode(gameName));
                         if (el == null)
                         {
                             results.Add(new SearchResult
@@ -625,7 +629,7 @@ namespace MetadataLocal
                                 ImageUrl = gameImg,
                                 StoreName = "Xbox",
                                 StoreId = gamePfns,
-                                StoreUrl = StoreUrl
+                                StoreUrl = storeUrl
                             });
 
                             i++;
