@@ -3,11 +3,11 @@
 
     <!-- MetadataLocalStoreSelection -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelection">メタデータソースのストア選択</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelection"></sys:String>
 
     <!-- MetadataLocalSettingsView -->
 
-    <sys:String x:Key="LOCMetadataLocalStoreSelect">メタデータのダウンロード時にメタデータソースのストア選択を有効にする</sys:String>
-    <sys:String x:Key="LOCMetadataLocalStoreOrder">未対応ストアのゲームの検索順</sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreSelect"></sys:String>
+    <sys:String x:Key="LOCMetadataLocalStoreOrder">未対応ストアのゲームの検索</sys:String>
 
 </ResourceDictionary>
