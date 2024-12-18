@@ -28,8 +28,8 @@ namespace MetadataLocal
         private readonly MetadataLocal Plugin;
         private MetadataLocalSettings EditingClone { get; set; }
 
-        private MetadataLocalSettings settings;
-        public MetadataLocalSettings Settings { get => settings; set => SetValue(ref settings, value); }
+        private MetadataLocalSettings _settings;
+        public MetadataLocalSettings Settings { get => _settings; set => SetValue(ref _settings, value); }
 
 
         public MetadataLocalSettingsViewModel(MetadataLocal plugin)

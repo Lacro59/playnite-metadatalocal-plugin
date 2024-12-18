@@ -151,7 +151,7 @@ namespace MetadataLocal
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
-                                    appId = (uint)new SteamApi("MetadataLocal").GetAppId(gameName);
+                                    appId = (uint)new SteamApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal).GetAppId(gameName);
                                 }
                                 else
                                 {
@@ -397,7 +397,7 @@ namespace MetadataLocal
         {
             try
             {
-                GogApi gogApi = new GogApi("MetadataLocal");
+                GogApi gogApi = new GogApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal);
                 gogApi.SetLanguage(playniteLanguage);
                 GameInfos gameInfos = gogApi.GetGameInfos(gameId, null);
                 return gameInfos.Description;
