@@ -52,23 +52,6 @@ namespace MetadataLocal
                 Settings.Stores.Add(new Store { Name = "Ubisoft Connect" });
                 Settings.Stores.Add(new Store { Name = "GOG" });
             }
-            else
-            {
-                if (Settings.Stores.Find(x => x.Name.IsEqual("Origin")) != null)
-                {
-                    Settings.Stores.Find(x => x.Name.IsEqual("Origin")).Name = "EA app";
-                }
-
-                if (Settings.Stores.Find(x => x.Name.IsEqual("Ubisoft")) != null)
-                {
-                    Settings.Stores.Find(x => x.Name.IsEqual("Ubisoft")).Name = "Ubisoft Connect";
-                }
-
-                if (Settings.Stores.Find(x => x.Name.IsEqual("GOG")) == null)
-                {
-                    Settings.Stores.Add(new Store { Name = "GOG" });
-                }
-            }
         }
 
         // Code executed when settings view is opened and user starts editing values.
