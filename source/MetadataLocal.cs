@@ -36,9 +36,8 @@ namespace MetadataLocal
             // Get plugin's location 
             string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            // Set the common resourses & event
+            // Load shared localization and resource dictionaries
             Common.Load(PluginFolder, api.ApplicationSettings.Language);
-            Common.SetEvent();
         }
 
         public override OnDemandMetadataProvider GetMetadataProvider(MetadataRequestOptions options)

@@ -4,16 +4,14 @@ using CommonPluginsShared;
 using MetadataLocal.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Globalization;
 
 namespace MetadataLocal.Views
 {
     /// <summary>
-    /// Logique d'interaction pour MetadataLocalStoreSelection.xaml
+    /// Interaction logic for MetadataLocalStoreSelection.xaml
     /// </summary>
     public partial class MetadataLocalStoreSelection : UserControl
     {
@@ -44,7 +42,7 @@ namespace MetadataLocal.Views
 
                 case "ea app":
                 case "origin":
-                    rbOrigin.IsChecked = true;
+                    rbEa.IsChecked = true;
                     break;
 
                 case "epic":
@@ -101,7 +99,7 @@ namespace MetadataLocal.Views
         {
             SearchElements();
         }
-        
+
         private void Rb_Check(object sender, RoutedEventArgs e)
         {
             if (!IsFirstLoad)
@@ -123,7 +121,7 @@ namespace MetadataLocal.Views
         {
             bool isSteam = (bool)rbSteam.IsChecked;
             bool isGog = (bool)rbGog.IsChecked;
-            bool isOrigin = (bool)rbOrigin.IsChecked;
+            bool isEa = (bool)rbEa.IsChecked;
             bool isEpic = (bool)rbEpic.IsChecked;
             bool isXbox = (bool)rbXbox.IsChecked;
             bool isUbisoft = (bool)rbUbisoft.IsChecked;
@@ -134,7 +132,7 @@ namespace MetadataLocal.Views
             string gameSearch = PlayniteTools.NormalizeGameName(SearchElement.Text);
 
             lbSelectable.ItemsSource = null;
-            Task task = Task.Run(() => LoadData(gameSearch, isSteam, isOrigin, isEpic, isXbox, isUbisoft, isGog))
+            Task task = Task.Run(() => LoadData(gameSearch, isSteam, isEa, isEpic, isXbox, isUbisoft, isGog))
                 .ContinueWith(antecedent =>
                 {
                     this.Dispatcher.Invoke(new Action(() =>
@@ -143,7 +141,7 @@ namespace MetadataLocal.Views
                         {
                             lbSelectable.ItemsSource = antecedent.Result;
                         }
-            
+
                         PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
                         PART_GridData.IsEnabled = true;
 
@@ -152,7 +150,7 @@ namespace MetadataLocal.Views
                 });
         }
 
-        private List<SearchResult> LoadData(string searchElement, bool isSteam, bool isOrigin, bool isEpic, bool isXbox, bool isUbisoft, bool isGog)
+        private List<SearchResult> LoadData(string searchElement, bool isSteam, bool isEa, bool isEpic, bool isXbox, bool isUbisoft, bool isGog)
         {
             List<SearchResult> results = new List<SearchResult>();
 
@@ -166,9 +164,9 @@ namespace MetadataLocal.Views
                 results = MetadataLocalProvider.GetMultiSGogData(searchElement);
             }
 
-            if (isOrigin)
+            if (isEa)
             {
-                results = MetadataLocalProvider.GetMultiOriginData(searchElement, PluginUserDataPath);
+                results = MetadataLocalProvider.GetMultiEaData(searchElement);
             }
 
             if (isEpic)

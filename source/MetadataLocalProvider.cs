@@ -17,13 +17,14 @@ using Playnite.SDK.Data;
 using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsStores.Steam;
-using CommonPluginsStores.Origin;
+using CommonPluginsStores.Ea;
+using CommonPluginsStores.Epic;
 using CommonPluginsShared.Extensions;
-using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
-using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using AngleSharp.Dom;
 using CommonPluginsStores.Gog;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Epic.Models.Query;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace MetadataLocal
 {
@@ -157,7 +158,8 @@ namespace MetadataLocal
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
-                                    appId = new SteamApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal).GetAppId(gameName);
+                                    SteamApi steamApi = new SteamApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal);
+                                    appId = steamApi.GetAppId(Options.GameData);
                                 }
                                 else
                                 {
@@ -176,7 +178,7 @@ namespace MetadataLocal
 
                             case "ea app":
                             case "origin":
-                                description = GetOriginData(gameId, PlayniteLanguage);
+                                description = GetEaData(gameId, PlayniteLanguage);
                                 break;
 
                             case "epic":
@@ -245,13 +247,13 @@ namespace MetadataLocal
             }
         }
 
-        public static string GetOriginData(string gameId, string playniteLanguage)
+        public static string GetEaData(string gameId, string playniteLanguage)
         {
             try
             {
-                OriginApi originApi = new OriginApi("MetadataLocal");
-                originApi.SetLanguage(playniteLanguage);
-                GameInfos gameInfos = originApi.GetGameInfos(gameId, null);
+                EaApi eaApi = new EaApi("MetadataLocal");
+                eaApi.SetLanguage(playniteLanguage);
+                GameInfos gameInfos = eaApi.GetGameInfos(gameId, null);
                 return gameInfos?.Description;
             }
             catch (Exception ex)
@@ -263,40 +265,52 @@ namespace MetadataLocal
 
         public static string GetEpicData(string gameName)
         {
-            using (WebStoreClient client = new WebStoreClient())
+            try
             {
-                string description = string.Empty;
-                List<WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement> catalogs = client.QuerySearch(gameName).GetAwaiter().GetResult();
-                if (catalogs?.HasItems() ?? false)
+                EpicApi epicApi = new EpicApi("MetadataLocal", ExternalPlugin.MetadataLocal);
+                epicApi.SetLanguage(PlayniteLanguage);
+
+                SearchStoreResponse response = epicApi.QuerySearchStore(gameName).GetAwaiter().GetResult();
+                List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
+                if (!elements.HasItems())
                 {
-                    WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
-                    if (catalog == null)
-                    {
-                        catalog = catalogs[0];
-                    }
-
-                    WebStoreModels.ProductResponse product = client.GetProductInfo(catalog.productSlug, PlayniteLanguage).GetAwaiter().GetResult();
-                    if (product?.pages?.HasItems() ?? false)
-                    {
-                        WebStoreModels.ProductResponse.Page page = product.pages.FirstOrDefault(a => a.type is string type && type == "productHome");
-                        if (page == null)
-                        {
-                            page = product.pages[0];
-                        }
-
-                        description = page.data.about.description;
-                        if (!description.IsNullOrEmpty())
-                        {
-                            description = description.Replace("\n", "\n<br>");
-                            description = Markup.MarkdownToHtml(description);
-                            description = Regex.Replace(
-                                description,
-                                "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
-                                "<img src=\"$1\"/>");
-                        }
-                    }
+                    return string.Empty;
                 }
+
+                SearchStoreResponse.Element catalog = elements.FirstOrDefault(a => a.Title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
+                if (catalog == null)
+                {
+                    catalog = elements[0];
+                }
+
+                string description = string.Empty;
+                if (!catalog.Namespace.IsNullOrEmpty())
+                {
+                    GameInfos gameInfos = epicApi.GetGameInfosAnonymous(catalog.Namespace);
+                    description = gameInfos?.Description;
+                }
+
+                if (description.IsNullOrEmpty())
+                {
+                    description = catalog.Description?.Trim() ?? string.Empty;
+                }
+
+                if (!description.IsNullOrEmpty())
+                {
+                    description = description.Replace("\n", "\n<br>");
+                    description = Markup.MarkdownToHtml(description);
+                    description = Regex.Replace(
+                        description,
+                        "!\\[[a-zA-Z0-9- -_]*\\][\\s]*\\(((ftp|http|https):\\/\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\/|\\/([\\w#!:.?+=&%@!\\-\\/]))?)\\)",
+                        "<img src=\"$1\"/>");
+                }
+
                 return description;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return string.Empty;
             }
         }
 
@@ -472,52 +486,17 @@ namespace MetadataLocal
             return results;
         }
 
-        public static List<SearchResult> GetMultiOriginData(string searchTerm, string pluginUserDataPath)
+        /// <summary>
+        /// EA multi-search. Legacy Origin xsearch is shut down; full redesign is tracked in the EA API study.
+        /// Returns an empty list until a public EA search is available in plugincommon.
+        /// </summary>
+        /// <param name="searchTerm">User search term (unused until search is restored).</param>
+        /// <returns>Empty list (best-effort degraded).</returns>
+        public static List<SearchResult> GetMultiEaData(string searchTerm)
         {
-            Common.LogDebug(true, $"GetMultiOriginData({searchTerm})");
-
-            string searchUrl = @"https://api1.origin.com/xsearch/store/en_US/usa/products?searchTerm={0}&start=0&rows=20&isGDP=true";
-            List<SearchResult> results = new List<SearchResult>();
-
-            try
-            {
-                string result = Web.DownloadStringDataWithGz(string.Format(searchUrl, searchTerm)).GetAwaiter().GetResult();
-
-                dynamic resultObject = Serialization.FromJson<dynamic>(result);
-                string stringData = Serialization.ToJson(resultObject["games"]["game"]);
-                List<OriginLibrary.GameStoreSearchResponse> listOriginGames = Serialization.FromJson<List<OriginLibrary.GameStoreSearchResponse>>(stringData);
-
-                if (listOriginGames.HasItems())
-                {
-                    foreach (OriginLibrary.GameStoreSearchResponse OriginGame in listOriginGames)
-                    {
-                        string title = OriginGame.gameName.Trim(); ;
-                        string img = OriginGame.image;
-
-                        OriginApi originApi = new OriginApi(pluginUserDataPath);
-                        string gameId = originApi.GetOriginId(title);
-
-                        Common.LogDebug(true, $"Find for {title} - {gameId}");
-
-                        if (!gameId.IsNullOrEmpty())
-                        {
-                            results.Add(new SearchResult
-                            {
-                                Name = title,
-                                ImageUrl = img,
-                                StoreName = "Origin",
-                                StoreId = gameId
-                            });
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
-            }
-
-            return results;
+            Common.LogDebug(true, $"GetMultiEaData({searchTerm})");
+            Logger.Warn("EA multi-search is unavailable (Origin xsearch shut down); deferred to EA API update.");
+            return new List<SearchResult>();
         }
 
         public static List<SearchResult> GetMultiEpicData(string searchTerm)
@@ -528,21 +507,21 @@ namespace MetadataLocal
 
             try
             {
-                using (WebStoreClient client = new WebStoreClient())
+                EpicApi epicApi = new EpicApi("MetadataLocal", ExternalPlugin.MetadataLocal);
+                SearchStoreResponse response = epicApi.QuerySearchStore(searchTerm).GetAwaiter().GetResult();
+                List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
+                if (elements.HasItems())
                 {
-                    List<WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement> catalogs = client.QuerySearch(searchTerm).GetAwaiter().GetResult();
-                    if (catalogs.HasItems())
+                    foreach (SearchStoreResponse.Element gameInfo in elements)
                     {
-                        foreach (WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement gameInfo in catalogs)
+                        string imageUrl = gameInfo.KeyImages?.Find(x => x.Type.IsEqual("OfferImageWide"))?.Url;
+                        results.Add(new SearchResult
                         {
-                            results.Add(new SearchResult
-                            {
-                                Name = gameInfo.title,
-                                ImageUrl = gameInfo.keyImages.Find(x => x.type == "OfferImageWide").url,
-                                StoreName = "Epic",
-                                StoreId = gameInfo.id
-                            });
-                        }
+                            Name = gameInfo.Title,
+                            ImageUrl = imageUrl,
+                            StoreName = "Epic",
+                            StoreId = gameInfo.Namespace.IsNullOrEmpty() ? gameInfo.Id : gameInfo.Namespace
+                        });
                     }
                 }
             }

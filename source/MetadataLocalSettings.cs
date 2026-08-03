@@ -1,8 +1,8 @@
-﻿using CommonPluginsShared.Extensions;
-using CommonPluginsShared.Plugins;
+﻿using CommonPluginsShared.Plugins;
 using MetadataLocal.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
 
 namespace MetadataLocal
@@ -10,20 +10,24 @@ namespace MetadataLocal
     public class MetadataLocalSettings : PluginSettings
     {
         #region Settings variables
-        public bool EnableSelectStore { get; set; } = false;
 
-        public List<Store> Stores { get; set; } = new List<Store>();
+        private bool _enableSelectStore = false;
+        public bool EnableSelectStore { get => _enableSelectStore; set => SetValue(ref _enableSelectStore, value); }
+
+        private List<Store> _stores = new List<Store>();
+        public List<Store> Stores { get => _stores; set => SetValue(ref _stores, value); }
+
         #endregion
 
         // Playnite serializes settings object to a JSON object and saves it as text file.
         // If you want to exclude some property from being saved then use `JsonDontSerialize` ignore attribute.
         #region Variables exposed
 
-        #endregion  
+        #endregion
     }
 
 
-    public class MetadataLocalSettingsViewModel : ObservableObject, ISettings
+    public class MetadataLocalSettingsViewModel : PluginSettingsViewModel, ISettings
     {
         private readonly MetadataLocal Plugin;
         private MetadataLocalSettings EditingClone { get; set; }
@@ -52,6 +56,16 @@ namespace MetadataLocal
                 Settings.Stores.Add(new Store { Name = "Ubisoft Connect" });
                 Settings.Stores.Add(new Store { Name = "GOG" });
             }
+            else
+            {
+                foreach (Store store in Settings.Stores)
+                {
+                    if (store.Name != null && store.Name.Equals("Origin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        store.Name = "EA app";
+                    }
+                }
+            }
         }
 
         // Code executed when settings view is opened and user starts editing values.
@@ -61,10 +75,10 @@ namespace MetadataLocal
         }
 
         // Code executed when user decides to cancel any changes made since BeginEdit was called.
-        // This method should revert any changes made to Option1 and Option2.
+        // Restores values in place to preserve bindings (see plugin-settings-live-refresh.md).
         public void CancelEdit()
         {
-            Settings = EditingClone;
+            CopySettingsValues(EditingClone, Settings);
         }
 
         // Code executed when user decides to confirm changes made since BeginEdit was called.
