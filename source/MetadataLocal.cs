@@ -45,8 +45,8 @@ namespace MetadataLocal
             return new MetadataLocalProvider(options, this, PlayniteConfigurationPath, PluginSettings.Settings);
         }
 
-
         #region Settings
+
         public override ISettings GetSettings(bool firstRunSettings)
         {
             return PluginSettings;
@@ -56,6 +56,7 @@ namespace MetadataLocal
         {
             return new MetadataLocalSettingsView();
         }
+
         #endregion
     }
 }
