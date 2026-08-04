@@ -426,7 +426,10 @@ namespace MetadataLocal
                 GogApi gogApi = new GogApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal);
                 gogApi.SetLanguage(playniteLanguage);
                 GameInfos gameInfos = gogApi.GetGameInfos(gameId, null);
-                return gameInfos?.Description;
+                string description = gameInfos?.Description;
+                Common.LogDebug(true,
+                    $"GetGogData({gameId}): hasDescription={!description.IsNullOrEmpty()}, name='{gameInfos?.Name}'");
+                return description;
             }
             catch (Exception ex)
             {
@@ -690,32 +693,48 @@ namespace MetadataLocal
 
         public static List<SearchResult> GetMultiSGogData(string searchTerm)
         {
-            Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
+            Common.LogDebug(true, $"GetMultiSGogData({searchTerm})");
 
             List<SearchResult> results = new List<SearchResult>();
-            string searchUrl = "https://www.gog.com/games/ajax/filtered?limit=20&search={0}";
-            searchUrl = string.Format(searchUrl, WebUtility.UrlEncode(searchTerm));
+
+            string playniteLanguage = PlayniteLanguage.IsNullOrEmpty()
+                ? API.Instance.ApplicationSettings.Language
+                : PlayniteLanguage;
+            string locale = CodeLang.GetGogLang(playniteLanguage).ToLower();
+            string searchUrl = string.Format(
+                "https://catalog.gog.com/v1/catalog?limit=20&locale={0}&order=desc:score&page=1&productType=in:game,pack&query=like:{1}",
+                locale,
+                WebUtility.UrlEncode(searchTerm));
 
             try
             {
                 string searchData = Web.DownloadStringData(searchUrl).GetAwaiter().GetResult();
                 GogSearchResult gogSearchResult = Serialization.FromJson<GogSearchResult>(searchData);
+                int apiProducts = gogSearchResult?.Products?.Count ?? 0;
 
-                foreach (Product el in gogSearchResult?.products)
+                foreach (GogCatalogProduct el in gogSearchResult?.Products ?? new List<GogCatalogProduct>())
                 {
+                    if (el.Id.IsNullOrEmpty() || el.Slug.IsNullOrEmpty())
+                    {
+                        continue;
+                    }
+
                     results.Add(new SearchResult
                     {
-                        Name = el.title,
-                        ImageUrl = "https:" + el.image + "_200.jpg",
-                        StoreId = el.id.ToString(),
+                        Name = el.Title,
+                        ImageUrl = !el.CoverVertical.IsNullOrEmpty() ? el.CoverVertical : el.CoverHorizontal,
+                        StoreId = el.Id,
                         StoreName = "GOG",
-                        StoreUrl = "https://www.gog.com/" + el.url
+                        StoreUrl = string.Format("https://www.gog.com/{0}/game/{1}", locale, el.Slug)
                     });
                 }
+
+                Common.LogDebug(true,
+                    $"GetMultiSGogData({searchTerm}): locale={locale}, productCount={gogSearchResult?.ProductCount ?? 0}, apiProducts={apiProducts}, results={results.Count}");
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
+                Common.LogError(ex, false, $"Failed to download {searchUrl}");
             }
 
             return results;
