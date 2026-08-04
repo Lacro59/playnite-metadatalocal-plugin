@@ -267,6 +267,8 @@ namespace MetadataLocal
         {
             try
             {
+                Common.LogDebug(true, $"GetEpicData({gameName})");
+
                 EpicApi epicApi = new EpicApi("MetadataLocal", ExternalPlugin.MetadataLocal);
                 epicApi.SetLanguage(PlayniteLanguage);
 
@@ -274,26 +276,43 @@ namespace MetadataLocal
                 List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
                 if (!elements.HasItems())
                 {
+                    Common.LogDebug(true, $"GetEpicData({gameName}): no SearchStore elements");
                     return string.Empty;
                 }
 
+                bool exactTitleMatch = true;
                 SearchStoreResponse.Element catalog = elements.FirstOrDefault(a => a.Title.Equals(gameName, StringComparison.InvariantCultureIgnoreCase));
                 if (catalog == null)
                 {
+                    exactTitleMatch = false;
                     catalog = elements[0];
                 }
 
                 string description = string.Empty;
+                string descriptionSource = "none";
                 if (!catalog.Namespace.IsNullOrEmpty())
                 {
                     GameInfos gameInfos = epicApi.GetGameInfosAnonymous(catalog.Namespace);
                     description = gameInfos?.Description;
+                    if (!description.IsNullOrEmpty())
+                    {
+                        descriptionSource = "GetGameInfosAnonymous";
+                    }
                 }
 
                 if (description.IsNullOrEmpty())
                 {
                     description = catalog.Description?.Trim() ?? string.Empty;
+                    if (!description.IsNullOrEmpty())
+                    {
+                        descriptionSource = "SearchStore.Element";
+                    }
                 }
+
+                Common.LogDebug(true,
+                    $"GetEpicData({gameName}): elements={elements.Count}, selected='{catalog.Title}', " +
+                    $"exactTitleMatch={exactTitleMatch}, namespace='{catalog.Namespace}', descriptionSource={descriptionSource}, " +
+                    $"descriptionLength={description?.Length ?? 0}");
 
                 if (!description.IsNullOrEmpty())
                 {
@@ -524,6 +543,9 @@ namespace MetadataLocal
                         });
                     }
                 }
+
+                Common.LogDebug(true,
+                    $"GetMultiEpicData({searchTerm}): elementCount={elements?.Count ?? 0}, results={results.Count}, responseNull={response == null}");
             }
             catch (Exception ex)
             {
