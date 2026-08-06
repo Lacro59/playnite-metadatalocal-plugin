@@ -10,13 +10,13 @@ using MetadataLocal.Views;
 using System.Windows;
 using System.Net;
 using AngleSharp.Parser.Html;
-using System.Web;
 using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Playnite.SDK.Data;
 using MetadataLocal.UbisoftLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsStores.Steam;
+using CommonPluginsStores.Steam.Models;
 using CommonPluginsStores.Ea;
 using CommonPluginsStores.Epic;
 using CommonPluginsShared.Extensions;
@@ -452,19 +452,27 @@ namespace MetadataLocal
 
 
         #region Search one to many
-        // From UniversalSteamMetadata
+        /// <summary>
+        /// Steam multi-search for store selection via <see cref="SteamApi.SearchStoreItems"/> (<c>api/storesearch</c>).
+        /// Numeric terms resolve a single AppId through <see cref="SteamApi.GetGameInfos"/>.
+        /// </summary>
+        /// <param name="searchTerm">User search term or Steam AppId.</param>
+        /// <returns>Matching Steam store candidates (StoreId = AppId).</returns>
         public static List<SearchResult> GetMultiSteamData(string searchTerm)
         {
             Common.LogDebug(true, $"GetMultiSteamData({searchTerm})");
 
             List<SearchResult> results = new List<SearchResult>();
-            string searchUrl = string.Empty;
+            string mode = "none";
+            int apiItems = 0;
 
             try
             {
+                SteamApi steamApi = new SteamApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal);
+
                 if (uint.TryParse(searchTerm, out uint appId))
                 {
-                    SteamApi steamApi = new SteamApi("MetadataLocal", PlayniteTools.ExternalPlugin.MetadataLocal);
+                    mode = "appId";
                     GameInfos gameInfos = steamApi.GetGameInfos(appId.ToString(), null);
                     if (gameInfos != null)
                     {
@@ -479,41 +487,36 @@ namespace MetadataLocal
                 }
                 else
                 {
-                    using (WebClient webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    mode = "storesearch";
+                    List<ItemSearch> items = steamApi.SearchStoreItems(searchTerm);
+                    apiItems = items?.Count ?? 0;
+                    if (items.HasItems())
                     {
-                        searchUrl = @"https://store.steampowered.com/search/?term={0}";
-                        string searchPageSrc = webClient.DownloadString(string.Format(searchUrl, searchTerm));
-                        HtmlParser parser = new HtmlParser();
-                        IHtmlDocument searchPage = parser.Parse(searchPageSrc);
-
-                        foreach (IElement gameElem in searchPage.QuerySelectorAll(".search_result_row"))
+                        foreach (ItemSearch item in items)
                         {
-                            string title = gameElem.QuerySelector(".title").InnerHtml;
-                            string img = gameElem.QuerySelector(".search_capsule img").GetAttribute("src");
-                            string releaseDate = gameElem.QuerySelector(".search_released").InnerHtml;
-                            if (gameElem.HasAttribute("data-ds-packageid"))
+                            if (item == null || item.Id <= 0 || item.Name.IsNullOrEmpty())
                             {
                                 continue;
                             }
-                            string gameId = gameElem.GetAttribute("data-ds-appid");
 
-                            if (!gameId.IsNullOrEmpty())
+                            results.Add(new SearchResult
                             {
-                                results.Add(new SearchResult
-                                {
-                                    Name = HttpUtility.HtmlDecode(title),
-                                    ImageUrl = img,
-                                    StoreName = "Steam",
-                                    StoreId = gameId
-                                });
-                            }
+                                Name = item.Name,
+                                ImageUrl = item.TinyImage,
+                                StoreName = "Steam",
+                                StoreId = item.Id.ToString()
+                            });
                         }
                     }
                 }
+
+                Common.LogDebug(true,
+                    $"GetMultiSteamData({searchTerm}): mode={mode}, apiItems={apiItems}, results={results.Count}, " +
+                    $"sample=[{string.Join(", ", results.Take(3).Select(x => $"{x.Name}|{x.StoreId}"))}]");
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Failed to download {string.Format(searchUrl, searchTerm)}");
+                Common.LogError(ex, false, $"GetMultiSteamData failed for '{searchTerm}'");
             }
 
             return results;
