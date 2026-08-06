@@ -95,6 +95,7 @@
     <Compile Include="Models\GogSearchResult.cs" />
     <Compile Include="Models\MicrosoftSuggestResult.cs" />
     <Compile Include="Models\Store.cs" />
+    <Compile Include="Models\MetadataLocalStoreResolver.cs" />
     <Compile Include="playnite-plugincommon\CommonPluginsControls\Controls\TextBlockTrimmed.xaml.cs">
       <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
     </Compile>

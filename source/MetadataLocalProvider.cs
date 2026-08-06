@@ -95,22 +95,16 @@ namespace MetadataLocal
                         gameId = Options.GameData.GameId;
                         gameName = Options.GameData.Name;
 
-                        if (Options.GameData.SourceId != default)
+                        if (storeName.IsNullOrEmpty())
                         {
-                            if (storeName.IsNullOrEmpty())
-                            {
-                                storeName = Options.GameData.Source.Name;
-                            }
-                        }
-                        else
-                        {
-                            if (ForceStoreName.IsNullOrEmpty())
+                            // Normalize Playnite source (PluginId + special cases e.g. "Xbox Game Pass" → "Xbox")
+                            storeName = GetSourceName(Options.GameData);
+
+                            if (Options.GameData.SourceId == default
+                                && (storeName.IsNullOrEmpty()
+                                    || storeName.Equals("Playnite", StringComparison.OrdinalIgnoreCase)))
                             {
                                 Logger.Warn("No source name");
-                            }
-                            else
-                            {
-                                storeName = ForceStoreName;
                             }
                         }
 
@@ -152,9 +146,12 @@ namespace MetadataLocal
                         }
 
 
-                        switch (storeName.ToLower())
+                        MetadataLocalStoreKind storeKind = MetadataLocalStoreResolver.Resolve(storeName);
+                        Common.LogDebug(true, $"GetDescription store: '{storeName}' → {storeKind}");
+
+                        switch (storeKind)
                         {
-                            case "steam":
+                            case MetadataLocalStoreKind.Steam:
                                 uint appId = 0;
                                 if (!ForceStoreName.IsNullOrEmpty())
                                 {
@@ -172,29 +169,27 @@ namespace MetadataLocal
                                 }
                                 break;
 
-                            case "gog":
+                            case MetadataLocalStoreKind.Gog:
                                 description = GetGogData(gameId, PlayniteLanguage);
                                 break;
 
-                            case "ea app":
-                            case "origin":
+                            case MetadataLocalStoreKind.Ea:
                                 description = GetEaData(gameId, PlayniteLanguage);
                                 break;
 
-                            case "epic":
+                            case MetadataLocalStoreKind.Epic:
                                 description = GetEpicData(gameName);
                                 break;
 
-                            case "xbox":
+                            case MetadataLocalStoreKind.Xbox:
                                 description = GetXboxData(storeUrl);
                                 break;
 
-                            case "ubisoft":
-                            case "uplay":
-                            case "ubisoft connect":
+                            case MetadataLocalStoreKind.Ubisoft:
                                 description = GetUbisoftData(gameName, PlayniteLanguage, gameId);
                                 break;
 
+                            case MetadataLocalStoreKind.Unknown:
                             default:
                                 if (ForceStoreName.IsNullOrEmpty() && !(!Options.IsBackgroundDownload && Settings.EnableSelectStore))
                                 {

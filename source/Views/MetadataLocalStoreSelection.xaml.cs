@@ -30,44 +30,56 @@ namespace MetadataLocal.Views
             PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
             PART_GridData.IsEnabled = true;
 
-            switch (storeDefault.ToLower())
-            {
-                case "steam":
-                    rbSteam.IsChecked = true;
-                    break;
-
-                case "gog":
-                    rbGog.IsChecked = true;
-                    break;
-
-                case "ea app":
-                case "origin":
-                    rbEa.IsChecked = true;
-                    break;
-
-                case "epic":
-                    rbEpic.IsChecked = true;
-                    break;
-
-                case "xbox":
-                    rbXbox.IsChecked = true;
-                    break;
-
-                case "ubisoft":
-                case "uplay":
-                case "ubisoft connect":
-                    rbUbisoft.IsChecked = true;
-                    break;
-
-                default:
-                    rbSteam.IsChecked = true;
-                    break;
-            }
+            ApplyDefaultStoreSelection(storeDefault);
 
             SearchElement.Text = gameName;
 
             SearchElements();
             IsFirstLoad = false;
+        }
+
+        /// <summary>
+        /// Pre-selects the store radio that best matches <paramref name="storeDefault"/> (aliases and partial match).
+        /// Falls back to Steam when no store is recognized.
+        /// </summary>
+        /// <param name="storeDefault">Normalized or raw Playnite source / store name.</param>
+        private void ApplyDefaultStoreSelection(string storeDefault)
+        {
+            MetadataLocalStoreKind resolved = MetadataLocalStoreResolver.Resolve(storeDefault);
+            MetadataLocalStoreKind selected = resolved == MetadataLocalStoreKind.Unknown
+                ? MetadataLocalStoreKind.Steam
+                : resolved;
+
+            Common.LogDebug(true, $"StoreSelection default: '{storeDefault}' → resolved={resolved}, selected={selected}");
+
+            switch (resolved)
+            {
+                case MetadataLocalStoreKind.Gog:
+                    rbGog.IsChecked = true;
+                    break;
+
+                case MetadataLocalStoreKind.Ea:
+                    rbEa.IsChecked = true;
+                    break;
+
+                case MetadataLocalStoreKind.Epic:
+                    rbEpic.IsChecked = true;
+                    break;
+
+                case MetadataLocalStoreKind.Xbox:
+                    rbXbox.IsChecked = true;
+                    break;
+
+                case MetadataLocalStoreKind.Ubisoft:
+                    rbUbisoft.IsChecked = true;
+                    break;
+
+                case MetadataLocalStoreKind.Steam:
+                case MetadataLocalStoreKind.Unknown:
+                default:
+                    rbSteam.IsChecked = true;
+                    break;
+            }
         }
 
 
