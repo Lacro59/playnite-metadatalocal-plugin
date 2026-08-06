@@ -247,14 +247,30 @@ namespace MetadataLocal
             }
         }
 
+        /// <summary>
+        /// Loads an EA / Origin store description for a Playnite GameId (Origin offer id) via public <see cref="EaApi"/> (no login).
+        /// </summary>
+        /// <param name="gameId">Origin offer id from the Playnite game.</param>
+        /// <param name="playniteLanguage">Playnite language code for store locale.</param>
+        /// <returns>Short description, or empty string when unresolved.</returns>
         public static string GetEaData(string gameId, string playniteLanguage)
         {
             try
             {
+                Common.LogDebug(true, $"GetEaData({gameId})");
+
                 EaApi eaApi = new EaApi("MetadataLocal");
                 eaApi.SetLanguage(playniteLanguage);
                 GameInfos gameInfos = eaApi.GetGameInfos(gameId, null);
-                return gameInfos?.Description;
+                string description = gameInfos?.Description;
+                if (description.IsNullOrEmpty())
+                {
+                    Common.LogDebug(true, $"GetEaData({gameId}): no description (slug unresolved or empty drop-api payload)");
+                    return string.Empty;
+                }
+
+                Common.LogDebug(true, $"GetEaData({gameId}): ok descriptionLength={description.Length}, slug='{gameInfos?.Id2}'");
+                return description;
             }
             catch (Exception ex)
             {
@@ -509,16 +525,45 @@ namespace MetadataLocal
         }
 
         /// <summary>
-        /// EA multi-search. Legacy Origin xsearch is shut down; full redesign is tracked in the EA API study.
-        /// Returns an empty list until a public EA search is available in plugincommon.
+        /// EA multi-search for store selection via public catalog index in <see cref="EaApi.SearchGames"/> (Phase B).
         /// </summary>
-        /// <param name="searchTerm">User search term (unused until search is restored).</param>
-        /// <returns>Empty list (best-effort degraded).</returns>
+        /// <param name="searchTerm">User search term.</param>
+        /// <returns>Matching EA store candidates (StoreId = Origin offer id).</returns>
         public static List<SearchResult> GetMultiEaData(string searchTerm)
         {
             Common.LogDebug(true, $"GetMultiEaData({searchTerm})");
-            Logger.Warn("EA multi-search is unavailable (Origin xsearch shut down); deferred to EA API update.");
-            return new List<SearchResult>();
+
+            List<SearchResult> results = new List<SearchResult>();
+            try
+            {
+                EaApi eaApi = new EaApi("MetadataLocal");
+                eaApi.SetLanguage(PlayniteLanguage);
+                List<GameInfos> games = eaApi.SearchGames(searchTerm);
+                if (games.HasItems())
+                {
+                    foreach (GameInfos game in games)
+                    {
+                        results.Add(new SearchResult
+                        {
+                            Name = game.Name,
+                            ImageUrl = game.Image,
+                            StoreName = "Origin",
+                            StoreId = game.Id,
+                            StoreUrl = game.Link
+                        });
+                    }
+                }
+
+                Common.LogDebug(true,
+                    $"GetMultiEaData({searchTerm}): gamesFromApi={games?.Count ?? 0}, results={results.Count}, " +
+                    $"sample=[{string.Join(", ", results.Take(3).Select(x => $"{x.Name}|{x.StoreId}"))}]");
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"GetMultiEaData failed for '{searchTerm}'");
+            }
+
+            return results;
         }
 
         public static List<SearchResult> GetMultiEpicData(string searchTerm)
