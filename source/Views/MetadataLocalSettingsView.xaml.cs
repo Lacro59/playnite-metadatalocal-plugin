@@ -12,7 +12,6 @@ namespace MetadataLocal.Views
             InitializeComponent();
         }
 
-
         private void PART_BtUp_Click(object sender, RoutedEventArgs e)
         {
             int index = int.Parse(((Button)sender).Tag.ToString());
