@@ -14,7 +14,6 @@ using MetadataLocal.Models;
 using AngleSharp.Dom.Html;
 using Playnite.SDK.Data;
 using MetadataLocal.UbisoftLibrary;
-using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsStores.Steam;
 using CommonPluginsStores.Steam.Models;
 using CommonPluginsStores.Ea;
@@ -115,15 +114,7 @@ namespace MetadataLocal
                             MetadataLocalStoreSelection viewExtension = null;
                             Application.Current.Dispatcher.Invoke(new Action(() =>
                             {
-                                WindowOptions windowOptions = new WindowOptions
-                                {
-                                    CanBeResizable = false,
-                                    ShowCloseButton = true,
-                                    ShowMaximizeButton = false,
-                                    ShowMinimizeButton = false,
-                                    Height = 660,
-                                    Width = 700
-                                };
+                                WindowOptions windowOptions = MetadataLocalStoreSelection.CreateWindowOptions();
                                 viewExtension = new MetadataLocalStoreSelection(storeName, gameName, Plugin.GetPluginUserDataPath());
                                 Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(ResourceProvider.GetString("LOCMetadataLocalStoreSelection"), viewExtension, windowOptions);
                                 _ = windowExtension.ShowDialog();
