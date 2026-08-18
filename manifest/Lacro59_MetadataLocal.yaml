@@ -71,3 +71,13 @@ Packages:
     Changelog:
       - 'Updated: Localizations'
       - 'Fixed: Xbox search data'
+  - Version: 3.1
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-18
+    PackageUrl: https://github.com/Lacro59/playnite-metadatalocal-plugin/releases/download/v3.1/playnite-metadatalocal-plugin_3_1.pext
+    Changelog:
+      - 'Improved: Store selection dialog layout and search'
+      - 'Fixed: Steam search, description images, and app list download'
+      - 'Fixed: GOG, Epic, and EA App store metadata'
+      - 'Fixed: Default store selection for Xbox Game Pass'
+      - 'Fixed: Store search language for game descriptions'

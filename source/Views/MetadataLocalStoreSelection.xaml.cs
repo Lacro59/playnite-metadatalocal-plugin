@@ -1,190 +1,81 @@
-﻿using Playnite.SDK;
-using Playnite.SDK.Data;
+﻿using MetadataLocal.Models;
+using MetadataLocal.ViewModels;
 using CommonPluginsShared;
-using MetadataLocal.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace MetadataLocal.Views
 {
     /// <summary>
-    /// Interaction logic for MetadataLocalStoreSelection.xaml
+    /// Store-selection dialog host. Logic lives in <see cref="MetadataLocalStoreSelectionViewModel"/>.
+    /// Dialog size is defined here only — see <see cref="DialogWidth"/> / <see cref="DialogHeight"/>.
     /// </summary>
     public partial class MetadataLocalStoreSelection : UserControl
     {
-        public string PluginUserDataPath { get; set; }
-        public SearchResult StoreResult { get; set; } = new SearchResult();
+        /// <summary>Default dialog width (single source of truth for window sizing).</summary>
+        public const double DialogWidth = 700;
 
-        public bool IsFirstLoad = true;
+        /// <summary>Default dialog height (single source of truth for window sizing).</summary>
+        public const double DialogHeight = 660;
 
+        private readonly MetadataLocalStoreSelectionViewModel _viewModel;
 
+        /// <summary>
+        /// Creates the dialog, wires the ViewModel, and starts the initial search via the ViewModel ctor.
+        /// </summary>
+        /// <param name="storeDefault">Normalized or raw Playnite source / store name.</param>
+        /// <param name="gameName">Initial search text.</param>
+        /// <param name="pluginUserDataPath">Plugin user-data path.</param>
         public MetadataLocalStoreSelection(string storeDefault, string gameName, string pluginUserDataPath)
         {
-            PluginUserDataPath = pluginUserDataPath;
-
             InitializeComponent();
 
-            PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
-            PART_GridData.IsEnabled = true;
-
-            switch (storeDefault.ToLower())
-            {
-                case "steam":
-                    rbSteam.IsChecked = true;
-                    break;
-
-                case "gog":
-                    rbGog.IsChecked = true;
-                    break;
-
-                case "ea app":
-                case "origin":
-                    rbEa.IsChecked = true;
-                    break;
-
-                case "epic":
-                    rbEpic.IsChecked = true;
-                    break;
-
-                case "xbox":
-                    rbXbox.IsChecked = true;
-                    break;
-
-                case "ubisoft":
-                case "uplay":
-                case "ubisoft connect":
-                    rbUbisoft.IsChecked = true;
-                    break;
-
-                default:
-                    rbSteam.IsChecked = true;
-                    break;
-            }
-
-            SearchElement.Text = gameName;
-
-            SearchElements();
-            IsFirstLoad = false;
+            _viewModel = new MetadataLocalStoreSelectionViewModel(storeDefault, gameName, pluginUserDataPath);
+            _viewModel.RequestClose += OnRequestClose;
+            DataContext = _viewModel;
         }
 
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Builds <see cref="WindowOptions"/> for this dialog (size + chrome).
+        /// Prefer this over hard-coding dimensions in the provider.
+        /// </summary>
+        /// <returns>Window options sized from <see cref="DialogWidth"/> / <see cref="DialogHeight"/>.</returns>
+        public static WindowOptions CreateWindowOptions()
         {
-            lbSelectable.ItemsSource = null;
-            lbSelectable.UpdateLayout();
+            return new WindowOptions
+            {
+                CanBeResizable = false,
+                ShowCloseButton = true,
+                ShowMaximizeButton = false,
+                ShowMinimizeButton = false,
+                Width = DialogWidth,
+                Height = DialogHeight,
+                MinWidth = 560,
+                MinHeight = 480
+            };
         }
 
+        /// <summary>Plugin user-data path from the ViewModel.</summary>
+        public string PluginUserDataPath => _viewModel.PluginUserDataPath;
 
-        private void BtCancel_Click(object sender, RoutedEventArgs e)
+        /// <summary>Confirmed search result after OK; empty when cancelled.</summary>
+        public SearchResult StoreResult => _viewModel.StoreResult;
+
+        private void OnRequestClose()
         {
-            ((Window)this.Parent).Close();
+            Window.GetWindow(this)?.Close();
         }
 
-        private void BtOk_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Runs search when Enter is pressed in the search box.
+        /// </summary>
+        private void SearchElement_KeyUp(object sender, KeyEventArgs e)
         {
-            StoreResult = (SearchResult)lbSelectable.SelectedItem;
-            ((Window)this.Parent).Close();
-        }
-
-
-        private void LbSelectable_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            btOk.IsEnabled = true;
-        }
-
-        private void ButtonSearch_Click(object sender, RoutedEventArgs e)
-        {
-            SearchElements();
-        }
-
-        private void Rb_Check(object sender, RoutedEventArgs e)
-        {
-            if (!IsFirstLoad)
+            if (e.Key == Key.Enter)
             {
-                SearchElements();
+                _viewModel.SearchCommand.Execute(null);
             }
-        }
-
-        private void SearchElement_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == System.Windows.Input.Key.Enter)
-            {
-                ButtonSearch_Click(null, null);
-            }
-        }
-
-
-        private void SearchElements()
-        {
-            bool isSteam = (bool)rbSteam.IsChecked;
-            bool isGog = (bool)rbGog.IsChecked;
-            bool isEa = (bool)rbEa.IsChecked;
-            bool isEpic = (bool)rbEpic.IsChecked;
-            bool isXbox = (bool)rbXbox.IsChecked;
-            bool isUbisoft = (bool)rbUbisoft.IsChecked;
-
-            PART_DataLoadWishlist.Visibility = Visibility.Visible;
-            PART_GridData.IsEnabled = false;
-
-            string gameSearch = PlayniteTools.NormalizeGameName(SearchElement.Text);
-
-            lbSelectable.ItemsSource = null;
-            Task task = Task.Run(() => LoadData(gameSearch, isSteam, isEa, isEpic, isXbox, isUbisoft, isGog))
-                .ContinueWith(antecedent =>
-                {
-                    this.Dispatcher.Invoke(new Action(() =>
-                    {
-                        if (antecedent.Result != null)
-                        {
-                            lbSelectable.ItemsSource = antecedent.Result;
-                        }
-
-                        PART_DataLoadWishlist.Visibility = Visibility.Collapsed;
-                        PART_GridData.IsEnabled = true;
-
-                        Common.LogDebug(true, $"SearchElements({gameSearch}) - " + Serialization.ToJson(antecedent.Result));
-                    }));
-                });
-        }
-
-        private List<SearchResult> LoadData(string searchElement, bool isSteam, bool isEa, bool isEpic, bool isXbox, bool isUbisoft, bool isGog)
-        {
-            List<SearchResult> results = new List<SearchResult>();
-
-            if (isSteam)
-            {
-                results = MetadataLocalProvider.GetMultiSteamData(searchElement);
-            }
-
-            if (isGog)
-            {
-                results = MetadataLocalProvider.GetMultiSGogData(searchElement);
-            }
-
-            if (isEa)
-            {
-                results = MetadataLocalProvider.GetMultiEaData(searchElement);
-            }
-
-            if (isEpic)
-            {
-                results = MetadataLocalProvider.GetMultiEpicData(searchElement);
-            }
-
-            if (isXbox)
-            {
-                results = MetadataLocalProvider.GetMultiXboxData(searchElement);
-            }
-
-            if (isUbisoft)
-            {
-                results = MetadataLocalProvider.GetMultiUbisoftData(searchElement);
-            }
-
-            return results;
         }
     }
 }
